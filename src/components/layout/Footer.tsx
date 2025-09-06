@@ -152,7 +152,7 @@ const Footer = () => {
         <div className="border-t border-white/20 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm hover:text-white transition-colors duration-300">
-              &copy; {new Date().getFullYear()} TechRise. All rights reserved.
+              &copy; {new Date().getFullYear()} IRU Business Group. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               {["Privacy Policy", "Terms of Service", "Sitemap"].map((item, index) => (
