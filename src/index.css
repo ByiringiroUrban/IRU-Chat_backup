@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* IRU Chat Design System - Professional Dark Theme */
+
+@layer base {
+  :root {
+    /* Core Background Colors */
+    --bg: 225 25% 8%;
+    --bg-secondary: 225 20% 12%;
+    --bg-card: 225 15% 15%;
+    --bg-glass: 225 25% 8% / 0.8;
+
+    /* Text Colors */
+    --text: 210 20% 95%;
+    --text-secondary: 210 15% 75%;
+    --text-muted: 210 10% 55%;
+
+    /* Brand Colors */
+    --brand-blue: 218 90% 72%;
+    --brand-cyan: 174 65% 58%;
+    --brand-gradient: linear-gradient(135deg, hsl(218 90% 72%), hsl(174 65% 58%));
+
+    /* Interactive Colors */
+    --interactive: 218 90% 72%;
+    --interactive-hover: 218 90% 78%;
+    --interactive-active: 218 90% 65%;
+
+    /* Status Colors */
+    --success: 142 72% 59%;
+    --warning: 38 92% 50%;
+    --error: 0 72% 51%;
+
+    /* Border & Effects */
+    --border: 225 15% 25%;
+    --border-light: 225 15% 35%;
+    --shadow-glow: 0 0 50px hsl(218 90% 72% / 0.2);
+    --shadow-card: 0 10px 40px hsl(225 25% 0% / 0.3);
+
+    /* Radius */
+    --radius: 12px;
+    --radius-lg: 16px;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Legacy shadcn variables for compatibility */
+    --background: 225 25% 8%;
+    --foreground: 210 20% 95%;
+    --card: 225 15% 15%;
+    --card-foreground: 210 20% 95%;
+    --popover: 225 15% 15%;
+    --popover-foreground: 210 20% 95%;
+    --primary: 218 90% 72%;
+    --primary-foreground: 225 25% 8%;
+    --secondary: 225 20% 12%;
+    --secondary-foreground: 210 20% 95%;
+    --muted: 225 15% 25%;
+    --muted-foreground: 210 10% 55%;
+    --accent: 174 65% 58%;
+    --accent-foreground: 225 25% 8%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 95%;
+    --border: 225 15% 25%;
+    --input: 225 15% 15%;
+    --ring: 218 90% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+
+  /* Glass Effect */
+  .glass {
+    @apply backdrop-blur-xl border border-border-light/20;
+    background: hsl(var(--bg-glass));
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Glow Effect */
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Hero Button */
+  .btn-hero {
+    @apply px-8 py-4 rounded-lg font-semibold;
+    background: var(--brand-gradient);
+    color: hsl(var(--bg));
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 20px hsl(var(--brand-blue) / 0.3);
+  }
+
+  .btn-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px hsl(var(--brand-blue) / 0.4);
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply px-8 py-4 rounded-lg font-semibold border-2;
+    border-color: hsl(var(--brand-blue));
+    color: hsl(var(--brand-blue));
+    background: transparent;
+    transition: var(--transition-smooth);
+  }
+
+  .btn-secondary:hover {
+    background: hsl(var(--brand-blue) / 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Card Styles */
+  .card-interactive {
+    @apply rounded-xl p-6 border border-border;
+    background: hsl(var(--bg-card));
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-4px);
+    border-color: hsl(var(--brand-blue) / 0.5);
+    box-shadow: 0 20px 60px hsl(var(--bg) / 0.5), 0 0 30px hsl(var(--brand-blue) / 0.1);
+  }
+
+  /* Animation Classes */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .fade-in-delay-1 {
+    animation-delay: 0.1s;
+  }
+
+  .fade-in-delay-2 {
+    animation-delay: 0.2s;
+  }
+
+  .fade-in-delay-3 {
+    animation-delay: 0.3s;
+  }
+
+  .fade-in-delay-4 {
+    animation-delay: 0.4s;
+  }
+
+  /* Floating Animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .float-delay-1 {
+    animation-delay: -2s;
+  }
+
+  .float-delay-2 {
+    animation-delay: -4s;
+  }
+
+  /* Hero Background */
+  .hero-bg {
+    background:
+      radial-gradient(circle at 20% 50%, hsl(var(--brand-blue) / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(var(--brand-cyan) / 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, hsl(var(--brand-blue) / 0.05) 0%, transparent 50%),
+      hsl(var(--bg));
+  }
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--bg));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--brand-blue) / 0.7);
+}
