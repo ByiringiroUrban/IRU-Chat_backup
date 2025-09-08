@@ -69,7 +69,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="transform transition-transform duration-500 hover:-translate-y-2">
             <h3 className="text-xl md:text-2xl font-bold mb-4 relative inline-block">
-              IRU<span className="text-techblue-300">Chat</span>
+              IRU<span className="text-techblue-300"> Chat</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light transition-all duration-300 group-hover:w-full"></span>
             </h3>
             <p className="text-gray-300 mb-6">
