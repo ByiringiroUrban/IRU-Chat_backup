@@ -28,8 +28,8 @@ const MovingWords = () => {
           <span
             key={index}
             className={`absolute text-xl md:text-3xl font-bold transition-all duration-700 ease-in-out ${index === currentIndex
-                ? `opacity-100 transform-none ${isAnimating ? "blur-sm scale-105" : ""}`
-                : "opacity-0 translate-y-16"
+              ? `opacity-100 transform-none ${isAnimating ? "blur-sm scale-105" : ""}`
+              : "opacity-0 translate-y-16"
               }`}
           >
             <span className="text-white"> Smart, Secure & AI-Powered </span>
@@ -69,7 +69,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="transform transition-transform duration-500 hover:-translate-y-2">
             <h3 className="text-xl md:text-2xl font-bold mb-4 relative inline-block">
-              Tech<span className="text-techblue-300">Rise</span>
+              IRU<span className="text-techblue-300">Business Group</span>
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light transition-all duration-300 group-hover:w-full"></span>
             </h3>
             <p className="text-gray-300 mb-6">
@@ -102,14 +102,6 @@ const Footer = () => {
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
               >
                 <Linkedin size={20} />
-              </a>
-              <a
-                href="https://www.instagram.com/techriserwanda/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
-              >
-                <Instagram size={20} />
               </a>
               <a
                 href="https://www.instagram.com/irubusinessgroup?igsh=Y2s1N25qY2xzM2Zu"
