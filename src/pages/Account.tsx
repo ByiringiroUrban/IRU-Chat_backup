@@ -24,7 +24,7 @@ const Account = () => {
     try {
       const parsed = JSON.parse(authData);
       setUser(parsed.user);
-      setEditedName(parsed.user?.name || '');
+      setEditedName(parsed.user?.name || parsed.user?.fullName || '');
       setEditedEmail(parsed.user?.email || '');
     } catch (e) {
       navigate('/auth');
@@ -39,8 +39,9 @@ const Account = () => {
     navigate('/');
   };
 
-  const handleSave = () => {
-    // Update local storage
+  const handleSave = async () => {
+    // TODO: In the future, make an API call to update the user profile
+    // For now, just update local storage
     const authData = localStorage.getItem('iru-auth');
     if (authData) {
       try {
@@ -131,7 +132,7 @@ const Account = () => {
                   />
                 ) : (
                   <div className="px-4 py-2 bg-bg-secondary rounded-lg text-text">
-                    {user.name}
+                    {user.name || user.fullName}
                   </div>
                 )}
               </div>
@@ -156,22 +157,22 @@ const Account = () => {
                 )}
               </div>
 
-              {/* Role Field */}
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2 flex items-center">
-                  <Shield className="mr-2 w-4 h-4" />
-                  Account Role
-                </label>
-                <div className="px-4 py-2 bg-bg-secondary rounded-lg">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                    user.role === 'ADMIN'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {user.role}
-                  </span>
+              {/* Account Created Date */}
+              {user.createdAt && (
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-2 flex items-center">
+                    <Shield className="mr-2 w-4 h-4" />
+                    Member Since
+                  </label>
+                  <div className="px-4 py-2 bg-bg-secondary rounded-lg text-text">
+                    {new Date(user.createdAt).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Edit Actions */}
               {isEditing && (
@@ -183,8 +184,8 @@ const Account = () => {
                     variant="outline"
                     onClick={() => {
                       setIsEditing(false);
-                      setEditedName(user.name);
-                      setEditedEmail(user.email);
+                      setEditedName(user.name || user.fullName || '');
+                      setEditedEmail(user.email || '');
                     }}
                   >
                     Cancel

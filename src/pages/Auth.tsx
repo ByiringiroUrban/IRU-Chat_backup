@@ -24,7 +24,7 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = `${API_BASE_URL}/api/users/login`;
+      const url = `${API_BASE_URL}/api/auth/login`;
       console.log('🔵 Sign in request to:', url);
       
       const res = await fetch(url, {
@@ -46,19 +46,29 @@ const AuthPage = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Failed to sign in");
+        // Handle validation errors
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessages = data.errors.map((err: any) => err.msg || err.message).join(', ');
+          throw new Error(errorMessages || "Validation failed");
+        }
+        throw new Error(data.error || data.message || "Failed to sign in");
       }
 
-      // Store token and role for later use
+      // Store token and user data
       localStorage.setItem(
         "iru-auth",
         JSON.stringify({
           token: data.token,
-          user: { id: data.id, name: data.name, email: data.email, role: data.role },
+          user: { 
+            id: data.user.id, 
+            name: data.user.fullName, 
+            email: data.user.email,
+            createdAt: data.user.createdAt
+          },
         })
       );
 
-      toast({ title: "Signed in", description: `Welcome back, ${data.name} (${data.role})` });
+      toast({ title: "Signed in", description: `Welcome back, ${data.user.fullName}!` });
       navigate("/account");
     } catch (err: any) {
       console.error('❌ Sign in error:', err);
@@ -76,13 +86,13 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = `${API_BASE_URL}/api/users/register`;
+      const url = `${API_BASE_URL}/api/auth/register`;
       console.log('🟢 Sign up request to:', url);
       
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role: "USER" }),
+        body: JSON.stringify({ fullName: name, email, password }),
       });
 
       console.log('🟢 Response status:', res.status, res.statusText);
@@ -98,18 +108,28 @@ const AuthPage = () => {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Failed to create account");
+        // Handle validation errors
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessages = data.errors.map((err: any) => err.msg || err.message).join(', ');
+          throw new Error(errorMessages || "Validation failed");
+        }
+        throw new Error(data.error || data.message || "Failed to create account");
       }
 
       localStorage.setItem(
         "iru-auth",
         JSON.stringify({
           token: data.token,
-          user: { id: data.id, name: data.name, email: data.email, role: data.role },
+          user: { 
+            id: data.user.id, 
+            name: data.user.fullName, 
+            email: data.user.email,
+            createdAt: data.user.createdAt
+          },
         })
       );
 
-      toast({ title: "Account created", description: `Logged in as ${data.name} (${data.role})` });
+      toast({ title: "Account created", description: `Welcome, ${data.user.fullName}!` });
       navigate("/account");
     } catch (err: any) {
       console.error('❌ Sign up error:', err);
