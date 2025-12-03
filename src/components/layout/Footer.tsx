@@ -80,18 +80,20 @@ const Footer = () => {
             {/* Social Links */}
             <div className="flex space-x-4">
               <a
-                href="https://www.youtube.com/@irutv-2060"
+                href="https://www.instagram.com/irubusinessgroup?igsh=Y2s1N25qY2xzM2Zu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                aria-label="Instagram"
               >
-                <Youtube size={20} />
+                <Instagram size={20} />
               </a>
               <a
                 href="https://x.com/IRUBUSINESSES?t=QHreTJ4D1GtZfix4tQIpyw&s=09"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                aria-label="X (Twitter)"
               >
                 <Twitter size={20} />
               </a>
@@ -100,16 +102,18 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
               </a>
               <a
-                href="https://www.instagram.com/irubusinessgroup?igsh=Y2s1N25qY2xzM2Zu"
+                href="https://www.youtube.com/@IRUTV-2060"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                aria-label="YouTube"
               >
-                <Instagram size={20} />
+                <Youtube size={20} />
               </a>
             </div>
           </div>
@@ -180,9 +184,14 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="border-t border-white/20 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm hover:text-white transition-colors duration-300">
+            <a
+              href="https://www.irubusinessgroup.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 text-sm hover:text-white transition-colors duration-300"
+            >
               &copy; {new Date().getFullYear()} IRU Business Group. All rights reserved.
-            </p>
+            </a>
             <div className="flex space-x-6 mt-4 md:mt-0">
               {["Privacy Policy", "Terms of Service", "Sitemap"].map((item, index) => (
                 <Link

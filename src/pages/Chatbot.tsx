@@ -152,14 +152,69 @@ const IruChat = () => {
     }, [messages, isTyping]);
 
     useEffect(() => {
+        // Check for feature query from Features page
+        const featureQuery = localStorage.getItem('chatbot-feature-query');
+        if (featureQuery) {
+            try {
+                const parsed = JSON.parse(featureQuery);
+                // Check if it's recent (within last 10 seconds)
+                if (Date.now() - parsed.timestamp < 10000) {
+                    // Auto-send feature query message
+                    const featureMessage = `Tell me more about ${parsed.name}: ${parsed.description}`;
+                    const userMessage = { from: 'me', text: featureMessage, time: Date.now() };
+                    const initialAssistantMessage = { 
+                        from: 'assistant', 
+                        text: generateFeatureResponse(parsed.name, parsed.description), 
+                        time: Date.now() 
+                    };
+                    setMessages([userMessage, initialAssistantMessage]);
+                    setConvoHistory([userMessage, initialAssistantMessage]);
+                    // Clear the feature query
+                    localStorage.removeItem('chatbot-feature-query');
+                    return;
+                }
+            } catch (e) {
+                // Ignore errors
+            }
+        }
+        
+        // Default initial message
         const initialAssistantMessage = { from: 'assistant', text: "Hello I'm IRU Assistant. I can summarize, create tasks, translate, and integrate with your systems. Try: 'Summarize this chat'", time: Date.now() };
         setMessages([initialAssistantMessage]);
         setConvoHistory([initialAssistantMessage]);
     }, []);
 
+    const generateFeatureResponse = (featureName, featureDescription) => {
+        const responses = {
+            "AI-Powered Conversation Intelligence": `Great choice! ${featureName} is one of our most powerful features. ${featureDescription}\n\nThis feature uses advanced AI to:\n• Remember context across conversations for more natural interactions\n• Automatically summarize meetings with actionable insights\n• Analyze sentiment in real-time to help you respond appropriately\n\nWould you like to know how to set this up, or do you have specific questions about how it works?`,
+            
+            "Multi-Layer Privacy & Security": `Excellent! ${featureName} ensures your data stays private and secure. ${featureDescription}\n\nKey benefits include:\n• Self-destructing rooms for sensitive conversations that automatically delete\n• On-device processing means your data never leaves your device\n• Stealth mode helps you communicate privately without detection\n\nThis is perfect for businesses handling confidential information. Want to learn more about our security protocols?`,
+            
+            "Built-in Business & Collaboration Tools": `Perfect! ${featureName} helps teams work together seamlessly. ${featureDescription}\n\nWith this feature, you can:\n• Create dedicated spaces for projects with their own tools and storage\n• Host high-quality meetings without leaving the app\n• Sign contracts and documents directly in chat\n• Convert voice messages into trackable tasks automatically\n\nThis eliminates the need for multiple apps. Would you like a demo of how this works?`,
+            
+            "Community & Broadcast Messaging": `Awesome! ${featureName} is perfect for large-scale communication. ${featureDescription}\n\nThis includes:\n• Community channels for large discussions with threaded topics\n• Broadcast messaging to reach unlimited subscribers\n• Interest-based communities (public or private) for connecting people\n\nGreat for organizations, communities, or businesses that need to reach many people. Want to know how to set up your first community?`,
+            
+            "Real-Time Multilingual Collaboration": `Fantastic! ${featureName} breaks down language barriers. ${featureDescription}\n\nFeatures include:\n• Instant translation for text and voice in real-time\n• Group translation mode for mixed-language teams\n• Seamless communication across different languages\n\nPerfect for global teams! Would you like to know which languages we support?`,
+            
+            "Advanced Media & File Features": `Excellent! ${featureName} makes file management effortless. ${featureDescription}\n\nCapabilities include:\n• AI-powered search inside images, audio, and documents\n• Smart document scanner built right into chat\n• Find exact details instantly without opening files\n\nThis saves tons of time! Want to see how the AI search works?`,
+            
+            "Productivity-First Experience": `Great choice! ${featureName} helps you stay focused and organized. ${featureDescription}\n\nIncludes:\n• Topic threads within chats to organize discussions\n• AI meeting scheduler that understands context\n• Focus mode to block non-essential notifications during work\n\nThis helps maximize your productivity! Want tips on setting up focus mode?`
+        };
+
+        // Try to find a specific response
+        for (const [key, value] of Object.entries(responses)) {
+            if (featureName.includes(key) || key.includes(featureName.split(' ')[0])) {
+                return value;
+            }
+        }
+
+        // Generic response
+        return `Great question about ${featureName}! ${featureDescription}\n\nThis is one of our most popular features. It helps users by providing advanced capabilities that enhance productivity and collaboration.\n\nWould you like to know:\n• How to get started with this feature?\n• Pricing information?\n• See a live demo?\n• Get technical details?\n\nJust let me know what you'd like to explore!`;
+    };
+
     return (
         <div className="flex h-screen bg-gradient-to-b from-[#041223] to-[#07122a] text-[#eaf3ff] p-4 sm:p-7">
-            <style jsx>{`
+            <style>{`
         .sidebar-bg {
           background: linear-gradient(180deg, #0d1624, rgba(13, 22, 36, 0.6));
         }

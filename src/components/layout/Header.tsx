@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import iruLogo from '@/assets/iruchatlogo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,8 +25,8 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/20">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <img src="/Logo.png" alt="IRU Chat Logo" className="h-8 w-auto" />
+        <Link to="/" className="flex items-center space-x-2 transition-transform duration-300 hover:scale-105">
+          <img src={iruLogo} alt="IRU Chat Logo" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -86,7 +87,7 @@ const Header = () => {
               </Link>
             ))}
             <div className="pt-4 space-y-3">
-              <Link to='/chatbot'>
+              <Link to='/chatbot' onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-text-secondary">
                   Chat Now
                 </Button>

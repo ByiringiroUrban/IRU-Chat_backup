@@ -7,28 +7,30 @@ import { Textarea } from '@/components/ui/textarea';
 const Contact = () => {
   const contactInfo = [
     {
-      icon: Mail,
-      title: "Email Us",
-      content: "contact@iruchat.com",
-      description: "We'll respond within 24 hours"
+      icon: Phone,
+      title: "Call Us",
+      content: "0795 381 733 / 0736 318 111",
+      description: "Available for support",
+      link: "tel:+250795381733"
     },
     {
       icon: Phone,
-      title: "Call Us",
-      content: "+250 786 874 032",
-      description: "Mon-Fri, 9 AM - 6 PM EAT"
+      title: "WhatsApp",
+      content: "0795381733",
+      description: "Chat with us on WhatsApp",
+      link: "https://wa.me/250795381733"
     },
     {
       icon: MapPin,
       title: "Visit Us",
-      content: "Kigali, Rwanda",
-      description: "IRU BUSINESS GROUP Ltd Headquarters"
+      content: "Gahanga, Kicukiro",
+      description: "Kigali, Rwanda - IRU BUSINESS GROUP Ltd"
     },
     {
       icon: Clock,
       title: "Business Hours",
-      content: "9:00 AM - 6:00 PM",
-      description: "East Africa Time (EAT)"
+      content: "Mon - Sun",
+      description: "08:00 AM - 8:00 PM"
     }
   ];
 
@@ -36,23 +38,10 @@ const Contact = () => {
     {
       city: "Kigali",
       country: "Rwanda",
-      address: "Kigali Business District",
-      phone: "+250 786 874 032",
-      email: "kigali@iruchat.com"
-    },
-    {
-      city: "Nairobi",
-      country: "Kenya",
-      address: "Coming Soon",
-      phone: "Coming Soon",
-      email: "nairobi@iruchat.com"
-    },
-    {
-      city: "Lagos",
-      country: "Nigeria",
-      address: "Coming Soon",
-      phone: "Coming Soon",
-      email: "lagos@iruchat.com"
+      address: "Gahanga, Kicukiro, Kigali, Rwanda",
+      phone: "0795 381 733 / 0736 318 111",
+      whatsapp: "0795381733",
+      email: "info@irubusinessgroup.com"
     }
   ];
 
@@ -210,6 +199,21 @@ const Contact = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             {contactInfo.map((info, index) => {
               const IconComponent = info.icon;
+              const contentElement = info.link ? (
+                <a
+                  href={info.link}
+                  target={info.link.startsWith('http') ? '_blank' : undefined}
+                  rel={info.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="text-xl font-bold text-gradient mb-2 hover:text-brand-cyan transition-colors"
+                >
+                  {info.content}
+                </a>
+              ) : (
+                <p className="text-xl font-bold text-gradient mb-2">
+                  {info.content}
+                </p>
+              );
+              
               return (
                 <div key={index} className="card-interactive text-center">
                   <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-cyan flex items-center justify-center">
@@ -218,9 +222,7 @@ const Contact = () => {
                   <h3 className="text-lg font-semibold text-text mb-2">
                     {info.title}
                   </h3>
-                  <p className="text-xl font-bold text-gradient mb-2">
-                    {info.content}
-                  </p>
+                  {contentElement}
                   <p className="text-text-secondary text-sm">
                     {info.description}
                   </p>

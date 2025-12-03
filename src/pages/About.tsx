@@ -227,7 +227,15 @@ const About = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-text-secondary">Phone:</span>
-                    <span className="text-text font-medium">+250 786 874 032</span>
+                    <a href="tel:+250795381733" className="text-text font-medium hover:text-brand-blue transition-colors">0795 381 733 / 0736 318 111</a>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">WhatsApp:</span>
+                    <a href="https://wa.me/250795381733" target="_blank" rel="noopener noreferrer" className="text-text font-medium hover:text-brand-blue transition-colors">0795381733</a>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Address:</span>
+                    <span className="text-text font-medium">Gahanga, Kicukiro, Kigali, Rwanda</span>
                   </div>
                 </div>
               </div>

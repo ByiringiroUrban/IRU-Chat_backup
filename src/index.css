@@ -17,10 +17,13 @@
     --text-secondary: 210 15% 75%;
     --text-muted: 210 10% 55%;
 
-    /* Brand Colors */
+    /* Brand Colors - Enhanced with logo-inspired palette */
     --brand-blue: 218 90% 72%;
     --brand-cyan: 174 65% 58%;
+    --brand-purple: 270 70% 65%;
+    --brand-pink: 330 75% 70%;
     --brand-gradient: linear-gradient(135deg, hsl(218 90% 72%), hsl(174 65% 58%));
+    --brand-gradient-vibrant: linear-gradient(135deg, hsl(270 70% 65%), hsl(218 90% 72%), hsl(174 65% 58%));
 
     /* Interactive Colors */
     --interactive: 218 90% 72%;
@@ -98,6 +101,8 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 5s ease infinite;
   }
 
   /* Glow Effect */
@@ -183,6 +188,28 @@
     animation-delay: -4s;
   }
 
+  /* Modern Animation Classes */
+  .animate-slide-in-left {
+    animation: slideInFromLeft 0.8s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInFromRight 0.8s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.6s ease-out forwards;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+
+  .gradient-animated {
+    background-size: 200% 200%;
+    animation: gradientShift 5s ease infinite;
+  }
+
   /* Hero Background */
   .hero-bg {
     background:
@@ -219,6 +246,60 @@
 
   100% {
     background-position: 200% 0;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--brand-blue) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--brand-blue) / 0.6), 0 0 60px hsl(var(--brand-cyan) / 0.4);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
