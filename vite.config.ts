@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://iru-chat-be-production.up.railway.app',
         changeOrigin: true,
         secure: false,
         ws: true, // Enable WebSocket proxying

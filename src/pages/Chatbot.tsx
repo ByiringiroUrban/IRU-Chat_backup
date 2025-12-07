@@ -373,7 +373,7 @@ const Chatbot = () => {
     setCharCount(inputValue.length || 20);
   }, [inputValue]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || inputValue.length > 3000) return;
 
@@ -391,17 +391,58 @@ const Chatbot = () => {
     setActiveView('chat');
     setIsTyping(true);
 
-    // Simulate AI response with feature detection
-    setTimeout(() => {
+    try {
+      // Get auth token if user is logged in
+      const authData = localStorage.getItem('iru-auth');
+      const token = authData ? JSON.parse(authData).token : null;
+
+      // Prepare conversation history (last 10 messages for context)
+      const conversationHistory = messages.slice(-10).map(msg => ({
+        sender: msg.sender,
+        text: msg.text,
+      }));
+
+      // Call OpenAI API
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify({
+          message: userInput,
+          conversationHistory: conversationHistory,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to get response' }));
+        throw new Error(errorData.error || 'Failed to get AI response');
+      }
+
+      const data = await response.json();
+      
       setIsTyping(false);
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateBotResponse(userInput),
+        text: data.response || 'I apologize, but I could not generate a response.',
         sender: 'assistant',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botResponse]);
-    }, 1000 + Math.random() * 1500);
+    } catch (error: any) {
+      console.error('Error calling OpenAI API:', error);
+      setIsTyping(false);
+      
+      // Fallback to simulated response if API fails
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: `I apologize, but I'm having trouble connecting right now. ${generateBotResponse(userInput)}`,
+        sender: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, botResponse]);
+    }
   };
 
   const generateBotResponse = (userInput: string): string => {

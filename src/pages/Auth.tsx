@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 // Use proxy in development (empty string = relative URL), direct URL in production
-// The Vite proxy will forward /api/* to http://localhost:5000/api/*
+// The Vite proxy will forward /api/* to https://iru-chat-be-production.up.railway.app/api/*
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 const AuthPage = () => {

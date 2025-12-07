@@ -42,13 +42,13 @@ const BackendTest = () => {
     }> = [
       {
         name: '1. Backend Health Check (Direct)',
-        url: 'http://localhost:5000',
+        url: 'https://iru-chat-be-production.up.railway.app',
         method: 'GET',
         expectedStatus: 200
       },
       {
         name: '2. Backend API Endpoint (Direct)',
-        url: 'http://localhost:5000/api',
+        url: 'https://iru-chat-be-production.up.railway.app/api',
         method: 'GET',
         expectedStatus: 200
       },
@@ -60,7 +60,7 @@ const BackendTest = () => {
       },
       {
         name: '4. Registration Endpoint (Direct)',
-        url: 'http://localhost:5000/api/users/register',
+        url: 'https://iru-chat-be-production.up.railway.app/api/users/register',
         method: 'POST',
         body: {
           name: 'Test User',
@@ -82,7 +82,7 @@ const BackendTest = () => {
       },
       {
         name: '6. Login Endpoint (Direct)',
-        url: 'http://localhost:5000/api/users/login',
+        url: 'https://iru-chat-be-production.up.railway.app/api/users/login',
         method: 'POST',
         body: {
           email: 'nonexistent@test.com',
@@ -213,7 +213,7 @@ const BackendTest = () => {
                 </div>
                 <div>
                   <span className="font-medium text-text-secondary">Backend URL:</span>{' '}
-                  <code className="bg-bg p-1 rounded text-text">http://localhost:5000</code>
+                  <code className="bg-bg p-1 rounded text-text">https://iru-chat-be-production.up.railway.app</code>
                 </div>
               </div>
             </div>
