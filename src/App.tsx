@@ -13,8 +13,12 @@ import Chatbot from "./pages/Chatbot";
 import CustomerSupport from "./pages/CustomerSupport";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account";
+import AdminDashboard from "./pages/AdminDashboard";
 import BackendTest from "./pages/BackendTest";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Sitemap from "./pages/Sitemap";
 
 const queryClient = new QueryClient();
 
@@ -32,10 +36,14 @@ const App = () => (
           <Route path="/support" element={<CustomerSupport />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/backend-test" element={<BackendTest />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/sitemap" element={<Sitemap />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -63,13 +63,19 @@ const AuthPage = () => {
             id: data.user.id, 
             name: data.user.fullName, 
             email: data.user.email,
+            role: data.user.role || 'user',
             createdAt: data.user.createdAt
           },
         })
       );
 
       toast({ title: "Signed in", description: `Welcome back, ${data.user.fullName}!` });
-      navigate("/account");
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/chatbot");
+      }
     } catch (err: any) {
       console.error('❌ Sign in error:', err);
       toast({
@@ -124,13 +130,19 @@ const AuthPage = () => {
             id: data.user.id, 
             name: data.user.fullName, 
             email: data.user.email,
+            role: data.user.role || 'user',
             createdAt: data.user.createdAt
           },
         })
       );
 
       toast({ title: "Account created", description: `Welcome, ${data.user.fullName}!` });
-      navigate("/account");
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/chatbot");
+      }
     } catch (err: any) {
       console.error('❌ Sign up error:', err);
       toast({

@@ -125,16 +125,16 @@ const Footer = () => {
               <span className="absolute -bottom-1 left-0 w-1/3 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light"></span>
             </h4>
             <ul className="space-y-2">
-              {["About Us", "Career", "", "Contact"].map((item, index) => (
-                <li
-                  key={index}
-                  className="transform hover:translate-x-2 transition-transform duration-300"
-                >
-                  <Link to={`/about`} className="text-gray-300 hover:text-white flex items-center">
-                    <span className="hover:text-techblue-300">{item}</span>
-                  </Link>
-                </li>
-              ))}
+              <li className="transform hover:translate-x-2 transition-transform duration-300">
+                <Link to="/about" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="hover:text-techblue-300">About Us</span>
+                </Link>
+              </li>
+              <li className="transform hover:translate-x-2 transition-transform duration-300">
+                <Link to="/contact" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="hover:text-techblue-300">Contact</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -145,19 +145,21 @@ const Footer = () => {
               <span className="absolute -bottom-1 left-0 w-1/3 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light"></span>
             </h4>
             <ul className="space-y-2">
-              {["Features", "Solutions", "How it Works", "Pricing", ""].map((item, index) => (
-                <li
-                  key={index}
-                  className="transform hover:translate-x-2 transition-transform duration-300"
-                >
-                  <Link
-                    to={`/features`}
-                    className="text-gray-300 hover:text-white flex items-center"
-                  >
-                    <span className="hover:text-techblue-300">{item}</span>
-                  </Link>
-                </li>
-              ))}
+              <li className="transform hover:translate-x-2 transition-transform duration-300">
+                <Link to="/features" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="hover:text-techblue-300">Features</span>
+                </Link>
+              </li>
+              <li className="transform hover:translate-x-2 transition-transform duration-300">
+                <Link to="/solutions" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="hover:text-techblue-300">Solutions</span>
+                </Link>
+              </li>
+              <li className="transform hover:translate-x-2 transition-transform duration-300">
+                <Link to="/pricing" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="hover:text-techblue-300">Pricing</span>
+                </Link>
+              </li>
             </ul>
           </div>
 

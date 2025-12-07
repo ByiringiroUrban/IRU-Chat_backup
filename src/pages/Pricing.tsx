@@ -1,15 +1,42 @@
+import { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Check, Star, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 const Pricing = () => {
-  const plans = [
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPricingPlans();
+  }, []);
+
+  const fetchPricingPlans = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/pricing`);
+      if (res.ok) {
+        const data = await res.json();
+        // Filter only active plans and sort them
+        const activePlans = data.filter((plan: any) => plan.isActive).sort((a: any, b: any) => a.price - b.price);
+        setPlans(activePlans);
+      }
+    } catch (error) {
+      console.error('Error fetching pricing plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Default plans if API fails or no plans exist
+  const defaultPlans = [
     {
+      id: '1',
       name: "Starter",
-      price: "RWF 3,500",
-      period: "per user/month",
+      price: 3500,
+      duration: "monthly",
       description: "Ideal for Small Teams & Startups",
       popular: false,
       features: [
@@ -19,9 +46,10 @@ const Pricing = () => {
       ]
     },
     {
+      id: '2',
       name: "Professional",
-      price: "RWF 7,500",
-      period: "per user/month",
+      price: 7500,
+      duration: "monthly",
       description: "Ideal for Growing Businesses",
       popular: true,
       features: [
@@ -33,9 +61,10 @@ const Pricing = () => {
       ]
     },
     {
+      id: '3',
       name: "Business",
-      price: "RWF 14,500",
-      period: "per user/month",
+      price: 14500,
+      duration: "monthly",
       description: "Ideal for Enterprises & Institutions",
       popular: false,
       features: [
@@ -48,9 +77,10 @@ const Pricing = () => {
       ]
     },
     {
+      id: '4',
       name: "Enterprise",
-      price: "From RWF 25,000",
-      period: "per user/month (or custom per project)",
+      price: 25000,
+      duration: "monthly",
       description: "Ideal for Large-Scale Organizations",
       popular: false,
       features: [
@@ -63,6 +93,24 @@ const Pricing = () => {
       ]
     }
   ];
+
+  const displayPlans = plans.length > 0 ? plans : defaultPlans;
+
+  // Format duration text
+  const getDurationText = (duration: string) => {
+    if (duration === 'monthly') return 'per user/month';
+    if (duration === 'yearly') return 'per user/year';
+    if (duration === 'lifetime') return 'one-time payment';
+    return `per ${duration}`;
+  };
+
+  // Format price display
+  const formatPrice = (price: number, name: string) => {
+    if (name === "Enterprise") {
+      return `From RWF ${price.toLocaleString()}`;
+    }
+    return `RWF ${price.toLocaleString()}`;
+  };
 
   const addOns = [
     {
@@ -116,51 +164,66 @@ const Pricing = () => {
       {/* Pricing Plans */}
       <section className="py-24 bg-bg-secondary">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {plans.map((plan, index) => (
-              <div
-                key={index}
-                className={`relative card-interactive ${plan.popular ? 'ring-2 ring-brand-blue glow' : ''
-                  }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-brand-blue to-brand-cyan text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
-                      <Star className="w-4 h-4" />
-                      <span>Most Popular</span>
-                    </div>
-                  </div>
-                )}
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-text-secondary">Loading pricing plans...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {displayPlans.map((plan, index) => {
+                // Determine if plan is popular (Professional plan or marked as popular)
+                const isPopular = plan.name === "Professional" || plan.popular || index === 1;
+                // Get features from plan.features array or use default
+                const planFeatures = Array.isArray(plan.features) ? plan.features : (plan.features || []);
 
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-text mb-2">{plan.name}</h3>
-                  <p className="text-text-secondary text-sm mb-4">{plan.description}</p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gradient">{plan.price}</span>
-                    {plan.price !== "Custom" && (
-                      <span className="text-text-secondary ml-2">{plan.period}</span>
-                    )}
-                  </div>
-                  <Button
-                    className={`w-full ${plan.popular ? 'btn-hero' : 'btn-secondary'
-                      }`}
+                return (
+                  <div
+                    key={plan.id || index}
+                    className={`relative bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700 hover:border-blue-500 transition-all ${
+                      isPopular ? 'ring-2 ring-blue-500' : ''
+                    }`}
                   >
-                    {plan.name === "Enterprise" ? "Contact Sales" : "Start Free Trial"}
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </div>
+                    {isPopular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                          <Star className="w-4 h-4" />
+                          <span>Most Popular</span>
+                        </div>
+                      </div>
+                    )}
 
-                <div className="space-y-4">
-                  {plan.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-start space-x-3">
-                      <Check className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
-                      <span className="text-text-secondary text-sm">{feature}</span>
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                      <p className="text-gray-400 text-sm mb-4">{plan.description || `Ideal for ${plan.name} users`}</p>
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold text-cyan-400">{formatPrice(plan.price, plan.name)}</span>
+                        <span className="text-gray-400 ml-2 text-sm">{getDurationText(plan.duration)}</span>
+                      </div>
+                      <Button
+                        className={`w-full ${
+                          isPopular
+                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        {plan.name === "Enterprise" ? "Contact Sales" : "Start Free Trial"}
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+
+                    <div className="space-y-4">
+                      {planFeatures.map((feature: string, featureIndex: number) => (
+                        <div key={featureIndex} className="flex items-start space-x-3">
+                          <Check className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-300 text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
