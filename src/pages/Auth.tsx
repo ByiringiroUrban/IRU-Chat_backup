@@ -74,7 +74,7 @@ const AuthPage = () => {
       if (data.user.role === 'admin') {
         navigate("/admin");
       } else {
-        navigate("/chatbot");
+        navigate("/chat");
       }
     } catch (err: any) {
       console.error('❌ Sign in error:', err);
@@ -141,7 +141,7 @@ const AuthPage = () => {
       if (data.user.role === 'admin') {
         navigate("/admin");
       } else {
-        navigate("/chatbot");
+        navigate("/chat");
       }
     } catch (err: any) {
       console.error('❌ Sign up error:', err);

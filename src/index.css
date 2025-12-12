@@ -6,13 +6,79 @@
 
 @layer base {
   :root {
-    /* Core Background Colors */
+    /* Light Mode - Core Background Colors */
+    --bg: 0 0% 100%;
+    --bg-secondary: 0 0% 98%;
+    --bg-card: 0 0% 100%;
+    --bg-glass: 0 0% 100% / 0.8;
+
+    /* Light Mode - Text Colors */
+    --text: 0 0% 10%;
+    --text-secondary: 0 0% 30%;
+    --text-muted: 0 0% 50%;
+
+    /* Brand Colors - Enhanced with logo-inspired palette */
+    --brand-blue: 218 90% 52%;
+    --brand-cyan: 174 65% 38%;
+    --brand-purple: 270 70% 45%;
+    --brand-pink: 330 75% 50%;
+    --brand-gradient: linear-gradient(135deg, hsl(218 90% 52%), hsl(174 65% 38%));
+    --brand-gradient-vibrant: linear-gradient(135deg, hsl(270 70% 45%), hsl(218 90% 52%), hsl(174 65% 38%));
+
+    /* Interactive Colors */
+    --interactive: 218 90% 52%;
+    --interactive-hover: 218 90% 48%;
+    --interactive-active: 218 90% 45%;
+
+    /* Status Colors */
+    --success: 142 72% 39%;
+    --warning: 38 92% 40%;
+    --error: 0 72% 41%;
+
+    /* Border & Effects */
+    --border: 0 0% 85%;
+    --border-light: 0 0% 90%;
+    --shadow-glow: 0 0 30px hsl(218 90% 52% / 0.15);
+    --shadow-card: 0 10px 40px hsl(0 0% 0% / 0.1);
+
+    /* Radius */
+    --radius: 12px;
+    --radius-lg: 16px;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Legacy shadcn variables for compatibility - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 218 90% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 98%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 50%;
+    --accent: 174 65% 38%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 41%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 98%;
+    --ring: 218 90% 52%;
+  }
+
+  .dark {
+    /* Dark Mode - Core Background Colors */
     --bg: 225 25% 8%;
     --bg-secondary: 225 20% 12%;
     --bg-card: 225 15% 15%;
     --bg-glass: 225 25% 8% / 0.8;
 
-    /* Text Colors */
+    /* Dark Mode - Text Colors */
     --text: 210 20% 95%;
     --text-secondary: 210 15% 75%;
     --text-muted: 210 10% 55%;
@@ -41,15 +107,7 @@
     --shadow-glow: 0 0 50px hsl(218 90% 72% / 0.2);
     --shadow-card: 0 10px 40px hsl(225 25% 0% / 0.3);
 
-    /* Radius */
-    --radius: 12px;
-    --radius-lg: 16px;
-
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-    /* Legacy shadcn variables for compatibility */
+    /* Legacy shadcn variables for compatibility - Dark Mode */
     --background: 225 25% 8%;
     --foreground: 210 20% 95%;
     --card: 225 15% 15%;
@@ -319,4 +377,14 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--brand-blue) / 0.7);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }

@@ -221,15 +221,8 @@ const Features = () => {
   }, []);
 
   const handleFeatureClick = (featureName: string, featureDescription: string) => {
-    // Store feature info in localStorage for chatbot page to access
-    localStorage.setItem('chatbot-feature-query', JSON.stringify({
-      name: featureName,
-      description: featureDescription,
-      timestamp: Date.now()
-    }));
-
-    // Redirect to chatbot page
-    window.location.href = '/chatbot';
+    // Redirect to chat page
+    window.location.href = '/chat';
   };
 
   const featureCategories = [

@@ -26,17 +26,17 @@ const FloatingButtons = ({ onOpenChatbot }: FloatingButtonsProps) => {
     });
   };
 
-  // Don't show chatbot button on support or chatbot pages
-  const isSupportPage = location.pathname === '/support' || location.pathname === '/chatbot';
+  // Don't show chat button on support or chat pages
+  const isSupportPage = location.pathname === '/support' || location.pathname === '/chat';
 
   return (
     <>
-      {/* Chatbot Button */}
+      {/* Chat Button */}
       {!isSupportPage && (
         <button
           onClick={onOpenChatbot}
           className="fixed bottom-24 right-4 md:right-6 z-50 group"
-          aria-label="Open Chatbot"
+          aria-label="Open Chat"
         >
           <div className="relative">
             {/* Pulsing glow effect */}
@@ -47,7 +47,7 @@ const FloatingButtons = ({ onOpenChatbot }: FloatingButtonsProps) => {
             {/* Tooltip */}
             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
               <div className="bg-bg-card text-text px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg border border-border">
-                Customer Support
+                Start Chatting
               </div>
               <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-bg-card"></div>
             </div>

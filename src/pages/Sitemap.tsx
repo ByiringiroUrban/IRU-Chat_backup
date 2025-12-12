@@ -13,7 +13,7 @@ const Sitemap = () => {
   ];
 
   const userPages = [
-    { name: 'Chatbot', path: '/chatbot', icon: MessageSquare, description: 'AI-powered chat interface' },
+    { name: 'Chat', path: '/chat', icon: MessageSquare, description: 'Community chat interface' },
     { name: 'Account', path: '/account', icon: User, description: 'Manage your account' },
     { name: 'Sign In / Sign Up', path: '/auth', icon: Shield, description: 'Authentication' },
   ];

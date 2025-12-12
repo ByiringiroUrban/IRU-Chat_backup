@@ -91,7 +91,7 @@ const Header = () => {
 
         {/* CTA Buttons */}
         <div className="hidden lg:flex items-center space-x-4">
-          <Link to='/chatbot'>
+          <Link to='/chat'>
             <Button variant="ghost" className="w-full justify-start text-text-secondary">
               Chat Now
             </Button>
@@ -119,15 +119,9 @@ const Header = () => {
                       My Account
                     </Link>
                     <Link
-                      to="/chatbot"
+                      to="/account"
                       onClick={() => {
                         setShowProfileDropdown(false);
-                        // Navigate to chatbot and open settings
-                        navigate('/chatbot');
-                        setTimeout(() => {
-                          const event = new CustomEvent('openChatbotSettings');
-                          window.dispatchEvent(event);
-                        }, 300);
                       }}
                       className="block px-4 py-2 text-sm text-text hover:bg-bg-secondary transition-colors flex items-center gap-2"
                     >
@@ -186,7 +180,7 @@ const Header = () => {
               </Link>
             ))}
             <div className="pt-4 space-y-3">
-              <Link to='/chatbot' onClick={() => setIsMenuOpen(false)}>
+              <Link to='/chat' onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-text-secondary">
                   Chat Now
                 </Button>
@@ -200,13 +194,9 @@ const Header = () => {
                     </Button>
                   </Link>
                   <Link
-                    to="/chatbot"
+                    to="/account"
                     onClick={() => {
                       setIsMenuOpen(false);
-                      setTimeout(() => {
-                        const event = new CustomEvent('openChatbotSettings');
-                        window.dispatchEvent(event);
-                      }, 300);
                     }}
                   >
                     <Button variant="ghost" className="w-full justify-start flex items-center gap-2">
