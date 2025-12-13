@@ -1,6 +1,5 @@
 import React from 'react';
-import { Users, Pin, Folder, Bell, Archive, ShieldAlert, ChevronRight, Image } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTheme } from 'next-themes';
 
 interface Chat {
   id: string;
@@ -32,106 +31,96 @@ const ChatInfoPanel: React.FC<ChatInfoPanelProps> = ({
   onMute,
   onArchive,
   onBlockReport,
-  chatName = 'Chat',
-  chatAvatar,
 }) => {
-  const memberCount = chat?.members?.length || 0;
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  // Theme-aware colors
+  const cardBg = isDark ? 'bg-[#101828]' : 'bg-white';
+  const cardBorder = isDark ? 'border-[rgba(255,255,255,0.09)]' : 'border-[rgba(15,23,42,0.10)]';
+  const cardHeaderBg = isDark ? 'bg-[rgba(255,255,255,0.02)]' : 'bg-[rgba(15,23,42,0.02)]';
+  const textPrimary = isDark ? 'text-[#e7eefc]' : 'text-[#0f172a]';
+  const textMuted = isDark ? 'text-[#9bb0d0]' : 'text-[#475569]';
+  const shadow = isDark ? 'shadow-[0_12px_30px_rgba(0,0,0,0.35)]' : 'shadow-[0_10px_25px_rgba(2,6,23,0.08)]';
+  const badgeBg = isDark ? 'bg-[rgba(255,255,255,0.02)]' : 'bg-[rgba(15,23,42,0.02)]';
+  const badgeBorder = isDark ? 'border-[rgba(255,255,255,0.09)]' : 'border-[rgba(15,23,42,0.10)]';
+  const buttonBg = isDark 
+    ? 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.09)] text-[#e7eefc] hover:bg-[rgba(255,255,255,0.05)]'
+    : 'bg-[rgba(15,23,42,0.02)] border-[rgba(15,23,42,0.10)] text-[#0f172a] hover:bg-[rgba(15,23,42,0.05)]';
+  const buttonDanger = isDark
+    ? 'bg-[rgba(255,107,107,0.12)] border-[rgba(255,107,107,0.35)] text-[#ff6b6b] hover:bg-[rgba(255,107,107,0.20)]'
+    : 'bg-[rgba(220,38,38,0.12)] border-[rgba(220,38,38,0.35)] text-[#dc2626] hover:bg-[rgba(220,38,38,0.20)]';
+  const divider = isDark ? 'bg-[rgba(255,255,255,0.09)]' : 'bg-[rgba(15,23,42,0.10)]';
+
+  const memberCount = chat?.members?.length || 5;
   const pinnedCount = 2;
   const sharedFilesCount = 14;
 
-  const statItems = [
-    { label: 'Members', value: memberCount, icon: Users },
-    { label: 'Pinned Messages', value: pinnedCount, icon: Pin },
-    { label: 'Shared Files', value: sharedFilesCount, icon: Folder },
-  ];
-
   return (
-    <section className="w-72 flex-shrink-0 flex flex-col h-full bg-[#0d1f35] border-l border-[#1e3a5f]">
+    <section className={`w-80 flex-shrink-0 flex flex-col h-full ${cardBg} border-l ${cardBorder} rounded-none ${shadow} overflow-hidden`}>
       {/* Header */}
-      <div className="p-4 border-b border-[#1e3a5f]">
-        <h2 className="font-semibold text-lg text-white">Details</h2>
+      <div className={`px-4 py-3.5 flex items-center justify-between gap-2.5 border-b ${cardBorder} ${cardHeaderBg}`}>
+        <h2 className={`text-sm font-medium tracking-wide m-0 ${textPrimary}`}>Info</h2>
+        <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
+          Members • Files
+        </span>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
-          {/* Profile */}
-          <div className="text-center">
-            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-500/30 flex items-center justify-center overflow-hidden ring-4 ring-cyan-500/20 mb-3">
-              {chatAvatar ? (
-                <img src={chatAvatar} alt={chatName} className="w-full h-full object-cover" />
-              ) : (
-                <span className="font-bold text-2xl text-white">{chatName.slice(0, 2).toUpperCase()}</span>
-              )}
-            </div>
-            <h3 className="font-semibold text-white text-lg">{chatName}</h3>
-            <p className="text-xs text-emerald-400 mt-1">● Online now</p>
-          </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Hint Text */}
+          <p className={`text-xs ${textMuted}`}>
+            Chat details panel.
+          </p>
 
-          {/* Stats */}
+          {/* Details */}
           <div className="space-y-2">
-            {statItems.map((item) => (
-              <button
-                key={item.label}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#162d4a] hover:bg-[#1e3a5f] transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#0a1628] flex items-center justify-center">
-                    <item.icon className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  <span className="text-sm text-slate-300">{item.label}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white">{item.value}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Media Preview */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Shared Media</span>
-              <button className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">View All</button>
+            <div className="flex items-center justify-between">
+              <span className={`text-sm ${textPrimary}`}>Members</span>
+              <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
+                {memberCount}
+              </span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="aspect-square rounded-lg bg-[#162d4a] flex items-center justify-center hover:bg-[#1e3a5f] transition-all cursor-pointer">
-                  <Image className="w-5 h-5 text-slate-500" />
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <span className={`text-sm ${textPrimary}`}>Pinned</span>
+              <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
+                {pinnedCount}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className={`text-sm ${textPrimary}`}>Shared files</span>
+              <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
+                {sharedFilesCount}
+              </span>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="h-px bg-[#1e3a5f]" />
+          <div className={`h-px ${divider}`} />
 
-          {/* Actions */}
+          {/* Action Buttons */}
           <div className="space-y-2">
             <button
               onClick={onMute}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-[#162d4a] hover:bg-[#1e3a5f] transition-all text-left"
+              className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${buttonBg}`}
             >
-              <Bell className="w-4 h-4 text-slate-400" />
-              <span className="text-sm text-slate-300">Mute Notifications</span>
+              Mute
             </button>
             <button
               onClick={onArchive}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-[#162d4a] hover:bg-[#1e3a5f] transition-all text-left"
+              className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${buttonBg}`}
             >
-              <Archive className="w-4 h-4 text-slate-400" />
-              <span className="text-sm text-slate-300">Archive Chat</span>
+              Archive
             </button>
             <button
               onClick={onBlockReport}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-left border border-red-500/20"
+              className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${buttonDanger}`}
             >
-              <ShieldAlert className="w-4 h-4 text-red-400" />
-              <span className="text-sm text-red-400">Block / Report</span>
+              Block / Report
             </button>
           </div>
         </div>
-      </ScrollArea>
+      </div>
     </section>
   );
 };

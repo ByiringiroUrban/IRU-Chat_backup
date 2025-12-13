@@ -13,6 +13,7 @@ import ChatTopBar from '@/components/chat/ChatTopBar';
 import EmptyConversation from '@/components/chat/EmptyConversation';
 import NewChatModal from '@/components/chat/NewChatModal';
 import SettingsSidebar from '@/components/chat/SettingsSidebar';
+import StatusPage from '@/components/chat/StatusPage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -606,7 +607,7 @@ const ChatPage = () => {
   if (!mounted) return null;
 
   return (
-    <div className="flex h-screen bg-[#070e18]">
+    <div className={`flex h-screen ${isDark ? 'bg-[#070e18]' : 'bg-[#f6f8fd]'}`}>
       {/* Hidden file input */}
       <input
         type="file"
@@ -631,61 +632,89 @@ const ChatPage = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden h-full">
-        {/* Chat List Panel */}
-        <ChatList
-          chats={filteredChats}
-          selectedChat={selectedChat}
-          onChatSelect={setSelectedChat}
-          onNewChat={() => setShowNewChatModal(true)}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          filter={chatFilter}
-          onFilterChange={setChatFilter}
-          currentUserId={currentUserId}
-          getChatName={getChatName}
-          getChatAvatar={getChatAvatar}
-          getChatInitials={getChatInitials}
-        />
-
-        {/* Conversation Panel */}
-        {selectedChat ? (
+      <div className="flex-1 flex flex-col overflow-hidden h-full">
+        {/* Page Content */}
+        {activeNav === 'status' ? (
           <>
-            <ChatConversation
-              messages={messages}
-              currentUserId={currentUserId}
-              inputValue={inputValue}
-              onInputChange={handleInputChange}
-              onSendMessage={handleSendMessage}
-              typingUsers={typingUsers}
-              isRecording={isRecording}
-              recordingTime={recordingTime}
-              onStartRecording={startRecording}
-              onStopRecording={stopRecording}
-              onCancelRecording={cancelRecording}
-              onSendVoice={sendVoiceMessage}
-              audioBlob={audioBlob}
-              onFileSelect={() => fileInputRef.current?.click()}
-              isMessageRead={isMessageRead}
-              formatRecordingTime={formatRecordingTime}
-              chatName={getChatName(selectedChat)}
-              chatAvatar={getChatAvatar(selectedChat)}
+            {/* Top Bar for Status */}
+            <ChatTopBar
+              title="Status"
+              subtitle="Presence, privacy, and quick context."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
             />
-
-            {/* Info Panel */}
-            <div className="hidden xl:flex h-full">
-              <ChatInfoPanel
-                chat={selectedChat}
-                onMute={() => toast.info('Mute clicked')}
-                onArchive={() => toast.info('Archive clicked')}
-                onBlockReport={() => toast.info('Block/Report clicked')}
-                chatName={getChatName(selectedChat)}
-                chatAvatar={getChatAvatar(selectedChat)}
-              />
-            </div>
+            <StatusPage />
           </>
         ) : (
-          <EmptyConversation />
+          <div className="flex-1 flex overflow-hidden">
+            {/* Chat List Panel - No top bar above it */}
+            <ChatList
+              chats={filteredChats}
+              selectedChat={selectedChat}
+              onChatSelect={setSelectedChat}
+              onNewChat={() => setShowNewChatModal(true)}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              filter={chatFilter}
+              onFilterChange={setChatFilter}
+              currentUserId={currentUserId}
+              getChatName={getChatName}
+              getChatAvatar={getChatAvatar}
+              getChatInitials={getChatInitials}
+            />
+
+            {/* Right side with Top Bar, Conversation, and Info */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Top Bar - Only above conversation and info */}
+              <ChatTopBar
+                title="Chats"
+                subtitle="DMs, groups, threads, and messaging composer."
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onNewAction={() => setShowNewChatModal(true)}
+                onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+              />
+
+              {/* Conversation and Info Panels */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* Conversation Panel - Always show, with static messages when no chat selected */}
+                <ChatConversation
+                  messages={selectedChat ? messages : []}
+                  currentUserId={currentUserId}
+                  inputValue={inputValue}
+                  onInputChange={handleInputChange}
+                  onSendMessage={handleSendMessage}
+                  typingUsers={typingUsers}
+                  isRecording={isRecording}
+                  recordingTime={recordingTime}
+                  onStartRecording={startRecording}
+                  onStopRecording={stopRecording}
+                  onCancelRecording={cancelRecording}
+                  onSendVoice={sendVoiceMessage}
+                  audioBlob={audioBlob}
+                  onFileSelect={() => fileInputRef.current?.click()}
+                  isMessageRead={isMessageRead}
+                  formatRecordingTime={formatRecordingTime}
+                  chatName={selectedChat ? getChatName(selectedChat) : undefined}
+                  chatAvatar={selectedChat ? getChatAvatar(selectedChat) : undefined}
+                />
+
+                {/* Info Panel - Always visible */}
+                <div className="hidden xl:flex h-full">
+                  <ChatInfoPanel
+                    chat={selectedChat}
+                    onMute={() => toast.info('Mute clicked')}
+                    onArchive={() => toast.info('Archive clicked')}
+                    onBlockReport={() => toast.info('Block/Report clicked')}
+                    chatName={selectedChat ? getChatName(selectedChat) : undefined}
+                    chatAvatar={selectedChat ? getChatAvatar(selectedChat) : undefined}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
