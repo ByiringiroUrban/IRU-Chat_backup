@@ -1,6 +1,5 @@
 import React from 'react';
-import { useTheme } from 'next-themes';
-import { Search, Plus, Pin } from 'lucide-react';
+import { Search, Plus, Pin, Filter } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 
@@ -65,78 +64,72 @@ const ChatList: React.FC<ChatListProps> = ({
   onSearchChange,
   filter,
   onFilterChange,
-  currentUserId,
   getChatName,
   getChatAvatar,
   getChatInitials,
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   const filters = [
-    { id: 'all', label: 'All' },
+    { id: 'all', label: 'All Chats' },
     { id: 'unread', label: 'Unread' },
     { id: 'pinned', label: 'Pinned' },
   ] as const;
 
   return (
-    <section className={`w-80 flex-shrink-0 flex flex-col border-r ${
-      isDark ? 'bg-card border-border' : 'bg-white border-border'
-    }`}>
+    <section className="w-80 flex-shrink-0 flex flex-col h-full bg-[#0d1f35] border-r border-[#1e3a5f]">
       {/* Header */}
-      <div className={`p-4 border-b ${isDark ? 'border-border' : 'border-border'}`}>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className={`font-semibold text-lg ${isDark ? 'text-foreground' : 'text-foreground'}`}>
-            Chat List
+      <div className="p-4 border-b border-[#1e3a5f]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-lg text-white">
+            Messages
           </h2>
-          <span className={`px-2 py-1 rounded text-xs font-medium ${
-            isDark ? 'bg-muted text-muted-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
-            DMs • Groups
-          </span>
+          <button
+            onClick={onNewChat}
+            className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search conversations..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#162d4a] border border-[#1e3a5f] text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+          />
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-3">
+        <div className="flex gap-1 p-1 bg-[#0a1628] rounded-xl">
           {filters.map((f) => (
             <button
               key={f.id}
               onClick={() => onFilterChange(f.id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
                 filter === f.id
-                  ? isDark 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-primary text-primary-foreground'
-                  : isDark
-                    ? 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {f.label}
             </button>
           ))}
         </div>
-
-        {/* New Chat Button */}
-        <button
-          onClick={onNewChat}
-          className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            isDark 
-              ? 'bg-muted hover:bg-muted/80 text-foreground' 
-              : 'bg-muted hover:bg-muted/80 text-foreground'
-          }`}
-        >
-          <Plus className="w-4 h-4" />
-          New Chat
-        </button>
       </div>
 
       {/* Chat Items */}
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
           {chats.length === 0 ? (
-            <div className={`p-4 text-center text-sm ${isDark ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
-              No chats yet. Start a new conversation!
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#162d4a] flex items-center justify-center">
+                <MessageSquare className="w-8 h-8 text-slate-500" />
+              </div>
+              <p className="text-sm text-slate-400">No conversations yet</p>
+              <p className="text-xs text-slate-500 mt-1">Start a new chat to begin messaging</p>
             </div>
           ) : (
             chats.map((chat) => {
@@ -145,82 +138,77 @@ const ChatList: React.FC<ChatListProps> = ({
               const avatar = getChatAvatar(chat);
               const initials = getChatInitials(chat);
               const chatName = getChatName(chat);
+              const hasUnread = chat.unreadCount && chat.unreadCount > 0;
 
               return (
                 <button
                   key={chat.id}
                   onClick={() => onChatSelect(chat)}
-                  className={`w-full p-3 rounded-lg transition-colors text-left ${
+                  className={`w-full p-3 rounded-xl transition-all duration-200 text-left group ${
                     isSelected
-                      ? isDark 
-                        ? 'bg-accent text-accent-foreground' 
-                        : 'bg-accent text-accent-foreground'
-                      : isDark
-                        ? 'hover:bg-muted/50'
-                        : 'hover:bg-muted/50'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30' 
+                      : 'hover:bg-white/5 border border-transparent'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="relative flex-shrink-0">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
-                        chat.type === 'one-to-one' ? 'bg-primary/20' :
-                        chat.type === 'group' ? 'bg-green-500/20' :
-                        'bg-purple-500/20'
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden ring-2 ${
+                        isSelected ? 'ring-cyan-400' : 'ring-transparent'
+                      } ${
+                        chat.type === 'one-to-one' ? 'bg-gradient-to-br from-cyan-500/30 to-blue-500/30' :
+                        chat.type === 'group' ? 'bg-gradient-to-br from-emerald-500/30 to-teal-500/30' :
+                        'bg-gradient-to-br from-purple-500/30 to-pink-500/30'
                       }`}>
                         {avatar ? (
                           <img src={avatar} alt={chatName} className="w-full h-full object-cover" />
                         ) : (
-                          <span className={`font-semibold text-sm ${
-                            chat.type === 'one-to-one' ? 'text-primary' :
-                            chat.type === 'group' ? 'text-green-600' :
-                            'text-purple-600'
-                          }`}>{initials}</span>
+                          <span className="font-semibold text-sm text-white">{initials}</span>
                         )}
                       </div>
                       {chat.isPinned && (
-                        <Pin className="absolute -bottom-1 -right-1 w-3 h-3 text-muted-foreground bg-background rounded-full p-0.5" />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                          <Pin className="w-3 h-3 text-white" />
+                        </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-0.5">
+                      <div className="flex items-center justify-between mb-1">
                         <span className={`font-medium text-sm truncate ${
-                          isDark ? 'text-foreground' : 'text-foreground'
+                          isSelected ? 'text-cyan-300' : 'text-white'
                         }`}>
                           {chatName}
                         </span>
-                        {chat.unreadCount && chat.unreadCount > 0 && (
-                          <span className="ml-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                            <span className="text-xs font-semibold text-primary-foreground">{chat.unreadCount}</span>
+                        {lastMessage && (
+                          <span className="text-[10px] text-slate-500 ml-2 flex-shrink-0">
+                            {format(new Date(lastMessage.createdAt), 'HH:mm')}
                           </span>
                         )}
                       </div>
-                      {lastMessage && (
-                        <div className="flex items-center justify-between">
-                          <p className={`text-xs truncate ${
-                            isDark ? 'text-muted-foreground' : 'text-muted-foreground'
-                          }`}>
+                      <div className="flex items-center justify-between">
+                        {lastMessage && (
+                          <p className="text-xs text-slate-400 truncate pr-2">
                             {lastMessage.content}
                           </p>
-                          <span className={`text-xs ml-2 flex-shrink-0 ${
-                            isDark ? 'text-muted-foreground' : 'text-muted-foreground'
-                          }`}>
-                            {format(new Date(lastMessage.createdAt), 'HH:mm')}
+                        )}
+                        {hasUnread && (
+                          <span className="w-5 h-5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/30">
+                            <span className="text-[10px] font-bold text-white">{chat.unreadCount}</span>
                           </span>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </button>
               );
             })
           )}
-          <p className={`text-xs p-3 ${isDark ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
-            Replace these with a virtualized list (large chats).
-          </p>
         </div>
       </ScrollArea>
     </section>
   );
 };
+
+// Add missing import
+import { MessageSquare } from 'lucide-react';
 
 export default ChatList;

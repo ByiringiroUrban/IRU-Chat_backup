@@ -606,7 +606,7 @@ const ChatPage = () => {
   if (!mounted) return null;
 
   return (
-    <div className={`flex h-screen ${isDark ? 'bg-background' : 'bg-background'}`}>
+    <div className="flex h-screen bg-[#070e18]">
       {/* Hidden file input */}
       <input
         type="file"
@@ -616,7 +616,7 @@ const ChatPage = () => {
       />
 
       {/* Left Sidebar - Navigation */}
-      <div className={`hidden lg:block ${showMobileMenu ? 'block' : ''}`}>
+      <div className={`hidden lg:flex h-full ${showMobileMenu ? 'flex' : ''}`}>
         <ChatSidebar
           activeNav={activeNav}
           onNavChange={(navId) => {
@@ -630,72 +630,63 @@ const ChatPage = () => {
         />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <ChatTopBar
-          title="Chats"
-          subtitle="DMs, groups, threads, and messaging composer."
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden h-full">
+        {/* Chat List Panel */}
+        <ChatList
+          chats={filteredChats}
+          selectedChat={selectedChat}
+          onChatSelect={setSelectedChat}
+          onNewChat={() => setShowNewChatModal(true)}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          onNewAction={() => setShowNewChatModal(true)}
-          onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+          filter={chatFilter}
+          onFilterChange={setChatFilter}
+          currentUserId={currentUserId}
+          getChatName={getChatName}
+          getChatAvatar={getChatAvatar}
+          getChatInitials={getChatInitials}
         />
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Chat List Panel */}
-          <ChatList
-            chats={filteredChats}
-            selectedChat={selectedChat}
-            onChatSelect={setSelectedChat}
-            onNewChat={() => setShowNewChatModal(true)}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            filter={chatFilter}
-            onFilterChange={setChatFilter}
-            currentUserId={currentUserId}
-            getChatName={getChatName}
-            getChatAvatar={getChatAvatar}
-            getChatInitials={getChatInitials}
-          />
+        {/* Conversation Panel */}
+        {selectedChat ? (
+          <>
+            <ChatConversation
+              messages={messages}
+              currentUserId={currentUserId}
+              inputValue={inputValue}
+              onInputChange={handleInputChange}
+              onSendMessage={handleSendMessage}
+              typingUsers={typingUsers}
+              isRecording={isRecording}
+              recordingTime={recordingTime}
+              onStartRecording={startRecording}
+              onStopRecording={stopRecording}
+              onCancelRecording={cancelRecording}
+              onSendVoice={sendVoiceMessage}
+              audioBlob={audioBlob}
+              onFileSelect={() => fileInputRef.current?.click()}
+              isMessageRead={isMessageRead}
+              formatRecordingTime={formatRecordingTime}
+              chatName={getChatName(selectedChat)}
+              chatAvatar={getChatAvatar(selectedChat)}
+            />
 
-          {/* Conversation Panel */}
-          {selectedChat ? (
-            <>
-              <ChatConversation
-                messages={messages}
-                currentUserId={currentUserId}
-                inputValue={inputValue}
-                onInputChange={handleInputChange}
-                onSendMessage={handleSendMessage}
-                typingUsers={typingUsers}
-                isRecording={isRecording}
-                recordingTime={recordingTime}
-                onStartRecording={startRecording}
-                onStopRecording={stopRecording}
-                onCancelRecording={cancelRecording}
-                onSendVoice={sendVoiceMessage}
-                audioBlob={audioBlob}
-                onFileSelect={() => fileInputRef.current?.click()}
-                isMessageRead={isMessageRead}
-                formatRecordingTime={formatRecordingTime}
+            {/* Info Panel */}
+            <div className="hidden xl:flex h-full">
+              <ChatInfoPanel
+                chat={selectedChat}
+                onMute={() => toast.info('Mute clicked')}
+                onArchive={() => toast.info('Archive clicked')}
+                onBlockReport={() => toast.info('Block/Report clicked')}
+                chatName={getChatName(selectedChat)}
+                chatAvatar={getChatAvatar(selectedChat)}
               />
-
-              {/* Info Panel */}
-              <div className="hidden xl:block">
-                <ChatInfoPanel
-                  chat={selectedChat}
-                  onMute={() => toast.info('Mute clicked')}
-                  onArchive={() => toast.info('Archive clicked')}
-                  onBlockReport={() => toast.info('Block/Report clicked')}
-                />
-              </div>
-            </>
-          ) : (
-            <EmptyConversation />
-          )}
-        </div>
+            </div>
+          </>
+        ) : (
+          <EmptyConversation />
+        )}
       </div>
 
       {/* Modals */}

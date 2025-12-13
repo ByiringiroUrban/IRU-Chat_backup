@@ -5,7 +5,7 @@ import {
   ClipboardCheck, FileText, Sparkles, Zap, Command,
   Heart, Lock, BadgeCheck, Shield, EyeOff,
   Camera, UserPlus, CreditCard, Folder, BarChart3,
-  Settings, Building2, Megaphone, Sun, Moon, User
+  Settings, Building2, Megaphone, Sun, Moon
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -13,7 +13,6 @@ interface NavItem {
   id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  href?: string;
 }
 
 interface NavSection {
@@ -96,43 +95,36 @@ interface ChatSidebarProps {
 const ChatSidebar: React.FC<ChatSidebarProps> = ({
   activeNav,
   onNavChange,
-  userProfile,
   isOnline = true,
 }) => {
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
   return (
-    <aside className={`w-64 flex-shrink-0 flex flex-col border-r ${
-      isDark ? 'bg-sidebar border-sidebar-border' : 'bg-white border-border'
-    }`}>
+    <aside className="w-60 flex-shrink-0 flex flex-col h-full bg-[#0a1628] border-r border-[#1e3a5f]">
       {/* Brand Header */}
-      <div className={`p-4 border-b ${isDark ? 'border-sidebar-border' : 'border-border'}`}>
+      <div className="p-4 border-b border-[#1e3a5f]">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${
-            isDark ? 'bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground'
-          }`}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center font-bold text-sm text-white shadow-lg shadow-cyan-500/20">
             IRU
           </div>
           <div>
-            <h1 className={`font-semibold text-base ${isDark ? 'text-sidebar-foreground' : 'text-foreground'}`}>
+            <h1 className="font-semibold text-base text-white">
               IRU Chat
             </h1>
-            <small className={`text-xs ${isDark ? 'text-sidebar-foreground/60' : 'text-muted-foreground'}`}>
-              /chat • UI skeleton
+            <small className="text-xs text-slate-400">
+              OneHealthLine Connect
             </small>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <ScrollArea className="flex-1">
+      {/* Navigation - Scrollable */}
+      <ScrollArea className="flex-1 overflow-y-auto">
         <nav className="p-2" aria-label="Sidebar">
           {navSections.map((section) => (
-            <div key={section.title} className="mb-4">
-              <div className={`px-3 py-2 text-xs font-semibold uppercase tracking-wider ${
-                isDark ? 'text-sidebar-foreground/50' : 'text-muted-foreground'
-              }`}>
+            <div key={section.title} className="mb-3">
+              <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                 {section.title}
               </div>
               {section.items.map((item) => {
@@ -142,18 +134,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   <button
                     key={item.id}
                     onClick={() => onNavChange(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                       isActive
-                        ? isDark 
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground' 
-                          : 'bg-accent text-accent-foreground'
-                        : isDark
-                          ? 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                          : 'text-foreground/80 hover:bg-accent/50 hover:text-foreground'
+                        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border-l-2 border-cyan-400' 
+                        : 'text-slate-300 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : ''}`} />
+                    <span className="truncate">{item.label}</span>
                   </button>
                 );
               })}
@@ -163,39 +151,28 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
       </ScrollArea>
 
       {/* Footer */}
-      <div className={`p-4 border-t ${isDark ? 'border-sidebar-border' : 'border-border'}`}>
+      <div className="p-4 border-t border-[#1e3a5f]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
               isOnline
-                ? isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'
-                : isDark ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-100 text-gray-600'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-slate-500/20 text-slate-400'
             }`}>
-              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
               {isOnline ? 'Online' : 'Offline'}
             </span>
           </div>
           <button
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className={`p-2 rounded-lg transition-colors ${
-              isDark ? 'hover:bg-sidebar-accent' : 'hover:bg-accent'
-            }`}
+            className="p-2 rounded-lg transition-colors hover:bg-white/10 text-slate-400 hover:text-white"
             title="Toggle theme"
           >
-            {isDark ? (
-              <Sun className="w-4 h-4 text-sidebar-foreground/80" />
-            ) : (
-              <Moon className="w-4 h-4 text-foreground/80" />
-            )}
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
         </div>
-        <div className={`h-px mb-3 ${isDark ? 'bg-sidebar-border' : 'bg-border'}`} />
-        <div className={`text-xs ${isDark ? 'text-sidebar-foreground/50' : 'text-muted-foreground'}`}>
-          Tip: <kbd className={`px-1.5 py-0.5 rounded text-xs ${
-            isDark ? 'bg-sidebar-accent text-sidebar-foreground' : 'bg-muted text-muted-foreground'
-          }`}>Ctrl</kbd> + <kbd className={`px-1.5 py-0.5 rounded text-xs ${
-            isDark ? 'bg-sidebar-accent text-sidebar-foreground' : 'bg-muted text-muted-foreground'
-          }`}>K</kbd> for quick search.
+        <div className="text-[11px] text-slate-500">
+          Tip: <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-slate-300">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-slate-300">K</kbd> for quick search
         </div>
       </div>
     </aside>
