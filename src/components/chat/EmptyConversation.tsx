@@ -1,24 +1,21 @@
 import React from 'react';
-import { useTheme } from 'next-themes';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, ArrowLeft } from 'lucide-react';
 
 const EmptyConversation: React.FC = () => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   return (
-    <div className={`flex-1 flex items-center justify-center ${
-      isDark ? 'bg-muted/30' : 'bg-muted/30'
-    }`}>
+    <div className="flex-1 flex items-center justify-center bg-[#0f2847]">
       <div className="text-center">
-        <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
-          isDark ? 'bg-muted' : 'bg-muted'
-        }`}>
-          <MessageSquare className={`w-8 h-8 ${isDark ? 'text-muted-foreground' : 'text-muted-foreground'}`} />
+        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/20">
+          <MessageSquare className="w-12 h-12 text-cyan-400" />
         </div>
-        <p className={`text-sm ${isDark ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
-          Select a chat to start messaging
+        <h3 className="text-xl font-semibold text-white mb-2">Welcome to Chat</h3>
+        <p className="text-sm text-slate-400 max-w-xs mx-auto">
+          Select a conversation from the list or start a new chat to begin messaging
         </p>
+        <div className="mt-6 flex items-center justify-center gap-2 text-slate-500">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-xs">Select a chat to get started</span>
+        </div>
       </div>
     </div>
   );
