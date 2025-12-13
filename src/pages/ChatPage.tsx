@@ -14,6 +14,9 @@ import EmptyConversation from '@/components/chat/EmptyConversation';
 import NewChatModal from '@/components/chat/NewChatModal';
 import SettingsSidebar from '@/components/chat/SettingsSidebar';
 import StatusPage from '@/components/chat/StatusPage';
+import CallsPage from '@/components/chat/CallsPage';
+import ContactsPage from '@/components/chat/ContactsPage';
+import LiveStreamPage from '@/components/chat/LiveStreamPage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -646,6 +649,45 @@ const ChatPage = () => {
               onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
             />
             <StatusPage />
+          </>
+        ) : activeNav === 'calls' ? (
+          <>
+            {/* Top Bar for Calls */}
+            <ChatTopBar
+              title="Calls"
+              subtitle="Voice/video calling, meeting links, and device check."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <CallsPage />
+          </>
+        ) : activeNav === 'contacts' ? (
+          <>
+            {/* Top Bar for Contacts */}
+            <ChatTopBar
+              title="Contacts"
+              subtitle="Directory, profiles, notes, import/export."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <ContactsPage />
+          </>
+        ) : activeNav === 'live-stream' ? (
+          <>
+            {/* Top Bar for Live Stream */}
+            <ChatTopBar
+              title="Live Stream"
+              subtitle="Broadcast, moderation, and replay library."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <LiveStreamPage />
           </>
         ) : (
           <div className="flex-1 flex overflow-hidden">
