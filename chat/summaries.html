@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<link rel="stylesheet" href="assets/app.css" />
+<script defer src="assets/app.js"></script>
+
+  <title>IRU Chat • Smart Summaries</title>
+</head>
+<body data-page="summaries">
+  <div class="layout">
+    <aside class="sidebar" aria-label="Primary">
+  <div class="brand">
+    <div class="brand-badge" aria-hidden="true">
+      <span style="font-weight:800; letter-spacing:.04em;">IRU</span>
+    </div>
+    <div>
+      <h1>IRU Chat</h1>
+      <small>/chat • UI skeleton</small>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Sidebar">
+    <div class="nav-section">Workspace</div>
+    <a href="status.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0-9-9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 12V7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 12h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Status</span></a>
+    <a href="chats.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 13a7 7 0 0 1-7 7H8l-5 3 1.6-5.6A7 7 0 0 1 3 13V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Chats</span></a>
+    <a href="calls.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h2l2 5-2 1a12 12 0 0 0 6 6l1-2 5 2v2a2 2 0 0 1-2 2c-8.8 0-16-7.2-16-16a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Calls</span></a>
+    <a href="contacts.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2"/><path d="M22 21v-2a3.5 3.5 0 0 0-2.6-3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Contacts</span></a>
+    <a href="live-stream.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h16v12H7l-3 3V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 9l5 3-5 3V9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Live Stream</span></a>
+    <a href="histories.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 4v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Histories</span></a>
+
+    <div class="nav-section">Smart Tools</div>
+    <a href="action-board.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 11l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 6h16M4 12h6M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Action Board</span></a>
+    <a href="thread-to-doc.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l3 3v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v3h3" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Thread → Doc Studio</span></a>
+    <a href="summaries.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l1.2 5 5 .8-5 1.2L12 14l-1.2-5-5-.8 5-1.2L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 14l.7 3 3 .7-3 .7-.7 3-.7-3-3-.7 3-.7.7-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Smart Summaries</span></a>
+    <a href="automations.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Workflow Automations</span></a>
+    <a href="command-center.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 9V6a3 3 0 1 0-3 3h3Zm0 0h6m0 0V6a3 3 0 1 1 3 3h-3Zm0 0v6m0 0h3a3 3 0 1 1-3 3v-3Zm0 0H9m0 0v3a3 3 0 1 1-3-3h3Zm0 0V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Command Center</span></a>
+
+    <div class="nav-section">Trust &amp; Safety</div>
+    <a href="dignity-mode.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-8-4.6-8-11a4.5 4.5 0 0 1 8-2.2A4.5 4.5 0 0 1 20 10c0 6.4-8 11-8 11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>IRU Dignity Mode</span></a>
+    <a href="consent-controls.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 11h12v10H6V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Consent Controls</span></a>
+    <a href="verification.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l3 2 3.5.5.5 3.5 2 3-2 3-.5 3.5-3.5.5-3 2-3-2-3.5-.5L3 14l-2-3 2-3 .5-3.5L7 4l3-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 12l2.2 2.2L15.8 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Identity &amp; Verification</span></a>
+    <a href="moderation.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Reports &amp; Moderation</span></a>
+    <a href="privacy-center.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9.9 5.1A10.8 10.8 0 0 1 12 5c6 0 10 7 10 7a18 18 0 0 1-4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.2 6.2C3.6 8 2 12 2 12s4 7 10 7c1 0 1.9-.1 2.8-.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Privacy Center</span></a>
+
+    <div class="nav-section">Creator Tools</div>
+    <a href="live-studio.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2"/><path d="M16 10l5-3v10l-5-3v-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Live Studio</span></a>
+    <a href="communities.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2"/><path d="M22 21v-2a3 3 0 0 0-2-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Community Builder</span></a>
+    <a href="monetization.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Monetization</span></a>
+    <a href="content-library.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Content Library</span></a>
+    <a href="creator-analytics.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 19h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 15V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 15V7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 15V9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Creator Analytics</span></a>
+
+    <div class="nav-section">Preferences</div>
+    <a href="settings.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a8 8 0 0 0 .1-6l2-1.5-2-3.4-2.4.8a8 8 0 0 0-5.1-3L11.5 0h-3L8 1.9a8 8 0 0 0-5.1 3L.5 4.1l-2 3.4 2 1.5a8 8 0 0 0 0 6l-2 1.5 2 3.4 2.4-.8a8 8 0 0 0 5.1 3L8.5 24h3l.5-1.9a8 8 0 0 0 5.1-3l2.4.8 2-3.4-2.1-1.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Settings</span></a>
+
+    <div class="nav-section">Enterprise</div>
+    <a href="enterprise-tools.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 21V7l9-4 9 4v14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 21v-8h6v8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 11h2M15 11h2M7 14h2M15 14h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Enterprise Tools</span></a>
+
+    <div class="nav-section">Growth</div>
+    <a href="advertise-marketing.html"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11v-1a3 3 0 0 1 3-3h3l6-3v16l-6-3H7a3 3 0 0 1-3-3v-1" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M18 9a4 4 0 0 1 0 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20.5 7.5a7 7 0 0 1 0 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Advertise / Marketing</span></a>
+  </nav>
+
+  <div class="sidebar-footer" aria-label="Quick status">
+    <div class="row">
+      <span class="pill"><span class="dot" aria-hidden="true"></span> Online</span>
+      <button class="btn" type="button" data-action="toggle-theme" title="Toggle theme">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> <span class="sr-only">Toggle theme</span>
+      </button>
+    </div>
+    <div class="hr"></div>
+    <div class="mini">Tip: <span class="kbd">Ctrl</span> + <span class="kbd">K</span> for quick search (wireframe).</div>
+  </div>
+</aside>
+
+    <div class="content">
+      <header class="topbar" role="banner">
+  <div class="topbar-left">
+    <button id="navToggle" class="btn" type="button" aria-label="Open menu">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="page-title">
+      <strong>Smart Summaries</strong>
+      <span>Daily/weekly summaries for teams, chats, and projects.</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <label class="input" aria-label="Search">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" placeholder="Search (placeholder)…" />
+    </label>
+    <button class="btn primary" type="button" onclick="IRUChat.toast('Action', 'Wireframe button clicked.')">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> New
+    </button>
+  </div>
+</header>
+
+      <main class="main" role="main">
+        <div class="grid cols-2">
+  <section class="card">
+    <div class="card-hd">
+      <h2>Smart Summaries</h2>
+      <span class="badge">Wireframe</span>
+    </div>
+    <div class="card-bd stack">
+      <p class="hint">Daily/weekly summaries for teams, chats, and projects.</p>
+      <div class="hr"></div>
+      <div class="row">
+        <button class="btn primary" type="button" onclick="IRUChat.toast('Smart Summaries', 'Primary action (wireframe).')">Primary action</button>
+        <button class="btn" type="button">Secondary</button>
+      </div>
+      <p class="hint">Suggested components:</p>
+      <ul class="hint" style="margin:0; padding-left:18px;"><li>Scheduled summary jobs</li><li>What changed since last summary</li><li>Mentions & decisions</li><li>Top risks / blockers</li><li>Share to email or channel</li></ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-hd">
+      <h2>Data Panel</h2>
+      <span class="badge">Placeholder</span>
+    </div>
+    <div class="card-bd">
+      <table class="table" aria-label="Placeholder table">
+        <thead><tr><th>Item</th><th>Status</th><th>Updated</th></tr></thead>
+        <tbody>
+          <tr><td>—</td><td><span class="badge">—</span></td><td>—</td></tr>
+          <tr><td>—</td><td><span class="badge">—</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">Connect to your API + persistence layer.</p>
+    </div>
+  </section>
+
+  <section class="card" style="grid-column: 1 / -1;">
+    <div class="card-hd">
+      <h2>Notes</h2>
+      <span class="badge">Implementation</span>
+    </div>
+    <div class="card-bd">
+      <div class="grid cols-3">
+        <div class="card" style="box-shadow:none;">
+          <div class="card-bd">
+            <b>Permissions</b>
+            <div class="hint">Define RBAC access for this tool.</div>
+          </div>
+        </div>
+        <div class="card" style="box-shadow:none;">
+          <div class="card-bd">
+            <b>Events</b>
+            <div class="hint">Emit audit + analytics events.</div>
+          </div>
+        </div>
+        <div class="card" style="box-shadow:none;">
+          <div class="card-bd">
+            <b>Integrations</b>
+            <div class="hint">Webhooks / exports / automation hooks.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+      </main>
+    </div>
+  </div>
+  <div id="navOverlay" aria-hidden="true"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite">
+  <strong>Notice</strong>
+  <span></span>
+</div>
+</body>
+</html>

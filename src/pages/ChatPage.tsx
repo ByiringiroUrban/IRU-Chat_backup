@@ -87,6 +87,8 @@ const ChatPage = () => {
   const [liveStreamUrl, setLiveStreamUrl] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [showSettingsSidebar, setShowSettingsSidebar] = useState(false);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [userCount, setUserCount] = useState(0);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -247,6 +249,10 @@ const ChatPage = () => {
 
     newSocket.on('user:online', ({ userId }: { userId: string }) => {
       setOnlineUsers(prev => new Set(prev).add(userId));
+      // Update user online status in allUsers
+      setAllUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, isOnline: true } : user
+      ));
     });
 
     newSocket.on('user:offline', ({ userId }: { userId: string }) => {
@@ -255,7 +261,12 @@ const ChatPage = () => {
         newSet.delete(userId);
         return newSet;
       });
+      // Update user offline status in allUsers
+      setAllUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, isOnline: false, lastSeen: new Date().toISOString() } : user
+      ));
     });
+
 
     newSocket.on('message:new', (message: Message) => {
       // Ensure message has proper structure
@@ -433,6 +444,56 @@ const ChatPage = () => {
 
   const currentUserId = getCurrentUserId();
 
+  // Clear localStorage on mount to remove any old static data
+  useEffect(() => {
+    localStorage.removeItem(STORAGE_KEYS.CHATS);
+    localStorage.removeItem(STORAGE_KEYS.MESSAGES);
+  }, []);
+
+  // Load all users and user count
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) return;
+
+        // Load user count
+        try {
+          const countResponse = await fetch(`${API_BASE_URL}/api/users/count`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (countResponse.ok) {
+            const countData = await countResponse.json();
+            setUserCount(countData.count || 0);
+          }
+        } catch (error) {
+          console.error('Error loading user count:', error);
+        }
+
+        // Load all users
+        try {
+          const usersResponse = await fetch(`${API_BASE_URL}/api/users`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (usersResponse.ok) {
+            const usersData = await usersResponse.json();
+            setAllUsers(usersData || []);
+          }
+        } catch (error) {
+          console.error('Error loading users:', error);
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
   // Load chats
   useEffect(() => {
     const loadChats = async () => {
@@ -445,13 +506,7 @@ const ChatPage = () => {
           return;
         }
         
-        // Load from localStorage first for quick display
-        const storedChats = loadChatsFromStorage();
-        if (storedChats.length > 0) {
-          setChats(storedChats);
-        }
-        
-        // Load from API
+        // Load from API only
         try {
           const response = await fetch(`${API_BASE_URL}/api/chats`, {
             headers: {
@@ -469,19 +524,18 @@ const ChatPage = () => {
             }));
             
             setChats(formattedChats);
-            saveChatsToStorage(formattedChats);
-          } else {
-            // If API fails, keep stored chats or clear if none
-            if (storedChats.length === 0) {
-              setChats([]);
+            // Only save to localStorage if we got data from API
+            if (formattedChats.length > 0) {
+              saveChatsToStorage(formattedChats);
             }
+          } else {
+            // If API fails, clear chats
+            setChats([]);
           }
         } catch (error) {
           console.error('Error loading chats from API:', error);
-          // Keep stored chats on error, or clear if none
-          if (storedChats.length === 0) {
-            setChats([]);
-          }
+          // Clear chats on error
+          setChats([]);
         }
       } catch (error) {
         console.error('Error loading chats:', error);
@@ -504,20 +558,6 @@ const ChatPage = () => {
       try {
         const token = getAuthToken();
         
-        // Load from localStorage first for quick display
-        const storedMessages = loadMessagesFromStorage(selectedChat.id);
-        if (storedMessages.length > 0) {
-          setMessages(storedMessages);
-        }
-        
-        // Also merge with messages from chat object if available
-        let mergedMessages = storedMessages;
-        if (selectedChat.messages && selectedChat.messages.length > 0) {
-          mergedMessages = mergeMessages(storedMessages, selectedChat.messages);
-          setMessages(mergedMessages);
-          saveMessagesToStorage(selectedChat.id, mergedMessages);
-        }
-        
         // Clear unread count when opening chat
         setChats(prev => {
           const updated = prev.map(chat => 
@@ -527,7 +567,7 @@ const ChatPage = () => {
           return updated;
         });
 
-        // Load from API if token exists
+        // Load from API only
         if (token) {
           try {
             const response = await fetch(`${API_BASE_URL}/api/chats/${selectedChat.id}/messages`, {
@@ -549,27 +589,30 @@ const ChatPage = () => {
                 },
               }));
               
+              setMessages(apiMessages);
+              // Only save to localStorage if we got data from API
               if (apiMessages.length > 0) {
-                const finalMessages = mergeMessages(mergedMessages, apiMessages);
-                setMessages(finalMessages);
-                saveMessagesToStorage(selectedChat.id, finalMessages);
-              } else if (apiMessages.length === 0 && mergedMessages.length === 0) {
-                // No messages from API and no stored messages
+                saveMessagesToStorage(selectedChat.id, apiMessages);
+              } else {
+                // Clear localStorage for this chat if no messages
+                const stored = localStorage.getItem(STORAGE_KEYS.MESSAGES);
+                if (stored) {
+                  const allMessages: Record<string, Message[]> = JSON.parse(stored);
+                  delete allMessages[selectedChat.id];
+                  localStorage.setItem(STORAGE_KEYS.MESSAGES, JSON.stringify(allMessages));
+                }
                 setMessages([]);
               }
+            } else {
+              setMessages([]);
             }
           } catch (error) {
             console.error('Error loading messages from API:', error);
-            // Keep stored messages on error
-            if (mergedMessages.length === 0) {
-              setMessages([]);
-            }
-          }
-        } else {
-          // No token, use stored messages or clear
-          if (mergedMessages.length === 0) {
             setMessages([]);
           }
+        } else {
+          // No token, clear messages
+          setMessages([]);
         }
       } catch (error) {
         console.error('Error loading messages:', error);
@@ -1188,9 +1231,13 @@ const ChatPage = () => {
               <User className={`w-6 h-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
             )}
           </div>
-          <div className={`absolute -top-1 -right-1 min-w-[32px] h-7 bg-red-500 rounded-full flex items-center justify-center border-2 ${isDark ? 'border-[#202c33]' : 'border-white'} px-2 shadow-lg z-20`}>
-            <span className="text-xs font-extrabold text-white leading-none whitespace-nowrap">99+</span>
-          </div>
+          {userCount > 0 && (
+            <div className={`absolute -top-1 -right-1 min-w-[32px] h-7 bg-red-500 rounded-full flex items-center justify-center border-2 ${isDark ? 'border-[#202c33]' : 'border-white'} px-2 shadow-lg z-20`}>
+              <span className="text-xs font-extrabold text-white leading-none whitespace-nowrap">
+                {userCount > 99 ? '99+' : userCount}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -1239,7 +1286,36 @@ const ChatPage = () => {
             <PhoneCall className={`w-6 h-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
           </button>
           <button
-            onClick={() => setActiveNav('contacts')}
+            onClick={async () => {
+              setActiveNav('contacts');
+              // Reload users when contacts tab is clicked
+              const token = getAuthToken();
+              if (token) {
+                try {
+                  const countResponse = await fetch(`${API_BASE_URL}/api/users/count`, {
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                    },
+                  });
+                  if (countResponse.ok) {
+                    const countData = await countResponse.json();
+                    setUserCount(countData.count || 0);
+                  }
+
+                  const usersResponse = await fetch(`${API_BASE_URL}/api/users`, {
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                    },
+                  });
+                  if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    setAllUsers(usersData || []);
+                  }
+                } catch (error) {
+                  console.error('Error reloading users:', error);
+                }
+              }
+            }}
             className={`p-3 rounded-lg transition-colors ${
               activeNav === 'contacts' 
                 ? isDark ? 'bg-[#2a3942]' : 'bg-blue-100'
@@ -1384,9 +1460,129 @@ const ChatPage = () => {
           </div>
         </div>
 
-        {/* Chat List */}
+        {/* Chat List or Contacts List */}
         <div className="flex-1 overflow-y-auto">
-          {sortedChats.map((chat) => {
+          {activeNav === 'contacts' ? (
+            // Contacts View - Show all users
+            allUsers.length === 0 ? (
+              <div className={`p-4 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                No users found
+              </div>
+            ) : (
+              allUsers
+                .filter(user => {
+                  if (!searchQuery) return true;
+                  const query = searchQuery.toLowerCase();
+                  return (
+                    user.fullName.toLowerCase().includes(query) ||
+                    user.email?.toLowerCase().includes(query) ||
+                    user.username?.toLowerCase().includes(query)
+                  );
+                })
+                .map((user) => {
+                  const handleUserClick = async () => {
+                    try {
+                      const token = getAuthToken();
+                      if (!token) return;
+
+                      // Check if chat already exists with this user
+                      const existingChat = chats.find(chat => 
+                        chat.type === 'one-to-one' && 
+                        chat.members.some(m => m.userId === user.id)
+                      );
+
+                      if (existingChat) {
+                        setSelectedChat(existingChat);
+                        setActiveNav('chats');
+                        return;
+                      }
+
+                      // Create new chat with this user
+                      const response = await fetch(`${API_BASE_URL}/api/chats`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                          type: 'one-to-one',
+                          memberIds: [user.id],
+                        }),
+                      });
+
+                      if (response.ok) {
+                        const newChat = await response.json();
+                        // Reload chats to get the new one
+                        const chatsResponse = await fetch(`${API_BASE_URL}/api/chats`, {
+                          headers: {
+                            'Authorization': `Bearer ${token}`,
+                          },
+                        });
+                        if (chatsResponse.ok) {
+                          const chatsData = await chatsResponse.json();
+                          const formattedChats: Chat[] = (chatsData || []).map((chat: any) => ({
+                            ...chat,
+                            messages: chat.messages || [],
+                            members: chat.members || [],
+                          }));
+                          setChats(formattedChats);
+                          const createdChat = formattedChats.find(c => c.id === newChat.id);
+                          if (createdChat) {
+                            setSelectedChat(createdChat);
+                            setActiveNav('chats');
+                          }
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Error creating chat:', error);
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={user.id}
+                      onClick={handleUserClick}
+                      className={`${chatListWidth < 320 ? 'px-2' : 'px-4'} py-3 cursor-pointer transition-colors border-b ${isDark ? 'border-gray-800' : 'border-gray-100'} ${
+                        isDark ? 'hover:bg-[#202c33]' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`flex items-start ${chatListWidth < 320 ? 'gap-2' : 'gap-3'}`}>
+                        <div className="relative flex-shrink-0">
+                          <div className={`${chatListWidth < 320 ? 'w-10 h-10' : 'w-12 h-12'} rounded-full flex items-center justify-center overflow-hidden bg-gray-600`}>
+                            {user.profilePicture ? (
+                              <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className={`text-white font-semibold ${chatListWidth < 320 ? 'text-xs' : 'text-sm'}`}>
+                                {user.fullName.charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          {user.isOnline && (
+                            <div className={`absolute bottom-0 right-0 ${chatListWidth < 320 ? 'w-2.5 h-2.5' : 'w-3 h-3'} bg-green-500 rounded-full border-2 ${isDark ? 'border-[#111b21]' : 'border-white'}`} />
+                          )}
+                        </div>
+                        {chatListWidth >= 280 && (
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className={`font-medium text-sm truncate ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                                {user.fullName}
+                              </h3>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className={`text-sm truncate flex-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {user.username ? `@${user.username}` : user.email}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+            )
+          ) : (
+            // Chats View
+            sortedChats.map((chat) => {
             const lastMessage = chat.messages[0];
             const isSelected = selectedChat?.id === chat.id;
             const avatar = getChatAvatar(chat);
@@ -1476,7 +1672,8 @@ const ChatPage = () => {
                 </div>
               </div>
             );
-          })}
+          })
+          )}
         </div>
       </div>
 
