@@ -29,7 +29,7 @@ const ChatTopBar: React.FC<ChatTopBarProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuToggle}
-          className={`p-2 rounded-lg transition-colors lg:hidden ${
+          className={`p-2 rounded-lg transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 lg:hidden ${
             isDark ? 'hover:bg-muted' : 'hover:bg-muted'
           }`}
           aria-label="Open menu"
@@ -65,7 +65,7 @@ const ChatTopBar: React.FC<ChatTopBarProps> = ({
         </div>
         <button
           onClick={onNewAction}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-out transform hover:scale-105 hover:shadow-lg active:scale-95 bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="w-4 h-4" />
           New

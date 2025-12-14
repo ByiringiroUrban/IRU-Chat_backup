@@ -118,15 +118,15 @@ const ChatList: React.FC<ChatListProps> = ({
             Groups
           </button>
         </div>
-      </div>
+        </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="p-4 space-y-3 flex-1 overflow-y-auto">
-          {/* Tabs */}
+        {/* Tabs */}
           <div className="flex gap-2">
             <button
               onClick={() => onFilterChange('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 border ${
                 filter === 'all' ? tabActive : tabInactive
               }`}
               role="tab"
@@ -136,7 +136,7 @@ const ChatList: React.FC<ChatListProps> = ({
             </button>
             <button
               onClick={() => onFilterChange('unread')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 border ${
                 filter === 'unread' ? tabActive : tabInactive
               }`}
               role="tab"
@@ -146,7 +146,7 @@ const ChatList: React.FC<ChatListProps> = ({
             </button>
             <button
               onClick={() => onFilterChange('pinned')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 border ${
                 filter === 'pinned' ? tabActive : tabInactive
               }`}
               role="tab"
@@ -159,7 +159,7 @@ const ChatList: React.FC<ChatListProps> = ({
           {/* New Chat Button */}
           <button
             onClick={onNewChat}
-            className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors border ${buttonBg}`}
+            className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] border ${buttonBg}`}
           >
             + New Chat
           </button>
@@ -171,7 +171,7 @@ const ChatList: React.FC<ChatListProps> = ({
               <>
                 {/* Static Chat: Design Team */}
                 <div
-                  className={`p-3 rounded-lg cursor-pointer transition-colors ${chatHover}`}
+                  className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${chatHover}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -201,12 +201,13 @@ const ChatList: React.FC<ChatListProps> = ({
                         </span>
                       </div>
                     </div>
-                  </div>
-                </div>
+        </div>
+      </div>
 
                 {/* Static Chat: M. Augustin */}
                 <div
-                  className={`p-3 rounded-lg cursor-pointer transition-colors ${chatHover}`}
+                  className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${chatHover}`}
+                  style={{ animationDelay: '50ms' }}
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -231,26 +232,27 @@ const ChatList: React.FC<ChatListProps> = ({
                         </span>
                       </div>
                     </div>
-                  </div>
-                </div>
+              </div>
+            </div>
               </>
-            ) : (
-              chats.map((chat) => {
-                const lastMessage = chat.messages[0];
-                const isSelected = selectedChat?.id === chat.id;
+          ) : (
+            chats.map((chat) => {
+              const lastMessage = chat.messages[0];
+              const isSelected = selectedChat?.id === chat.id;
                 const chatName = getChatName(chat);
                 const chatAvatar = getChatAvatar(chat);
-                const initials = getChatInitials(chat);
+              const initials = getChatInitials(chat);
 
-                return (
+              return (
                   <div
-                    key={chat.id}
-                    onClick={() => onChatSelect(chat)}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  key={chat.id}
+                  onClick={() => onChatSelect(chat)}
+                    className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${
                       isSelected ? chatSelected : chatHover
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
+                  }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="flex items-start gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                         isDark ? 'bg-gray-600' : 'bg-gray-300'
                       }`}>
@@ -260,22 +262,22 @@ const ChatList: React.FC<ChatListProps> = ({
                           <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             {initials}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
                           <span className={`text-sm font-medium ${textPrimary} truncate`}>
-                            {chatName}
-                          </span>
+                          {chatName}
+                        </span>
                           {chat.unreadCount && chat.unreadCount > 0 && (
                             <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
                               isDark ? 'bg-red-500 text-white' : 'bg-red-500 text-white'
                             }`}>
                               {chat.unreadCount}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between">
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
                           <p className={`text-xs ${textMuted} truncate pr-2`}>
                             {lastMessage 
                               ? lastMessage.content.length > 30 
@@ -286,16 +288,16 @@ const ChatList: React.FC<ChatListProps> = ({
                           {lastMessage && (
                             <span className={`text-xs ${textMuted} flex-shrink-0`}>
                               {format(new Date(lastMessage.createdAt), 'HH:mm')}
-                            </span>
-                          )}
+                          </span>
+                        )}
                         </div>
                       </div>
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
+              );
+            })
+          )}
+        </div>
         </div>
 
         {/* Hint Text */}

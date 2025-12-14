@@ -97,33 +97,33 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
           Thread-ready
         </span>
-      </div>
+            </div>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {/* Placeholder text */}
         <div className={`mb-4 ${textMuted} text-xs`}>
           Message timeline (render messages here).
-        </div>
+            </div>
 
         {messages.length === 0 ? (
           <>
             {/* Static example messages for wireframe */}
             {/* Message from Alex */}
-            <div className="flex justify-start">
-              <div className={`max-w-[78%] rounded-lg px-3 py-2 ${messageOther}`}>
+            <div className="flex justify-start animate-slide-in-left">
+              <div className={`max-w-[78%] rounded-lg px-3 py-2 transition-all duration-300 hover:shadow-md ${messageOther}`}>
                 <div className={`text-xs font-medium mb-1 ${textMuted}`}>
                   Alex • 10:14
-                </div>
+          </div>
                 <div className={`text-sm ${textPrimary}`}>
                   <p>Wireframe message bubble.</p>
-                </div>
-              </div>
-            </div>
+          </div>
+        </div>
+      </div>
 
             {/* Message from You */}
-            <div className="flex justify-end">
-              <div className={`max-w-[78%] rounded-lg px-3 py-2 ${messageOwn}`}>
+            <div className="flex justify-end animate-slide-in-right">
+              <div className={`max-w-[78%] rounded-lg px-3 py-2 transition-all duration-300 hover:shadow-md ${messageOwn}`}>
                 <div className={`text-xs font-medium mb-1 ${textMuted}`}>
                   You • 10:15
                 </div>
@@ -141,24 +141,25 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
             return (
               <div
                 key={message.id}
-                className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className={`max-w-[78%] rounded-lg px-3 py-2 ${
+                <div className={`max-w-[78%] rounded-lg px-3 py-2 transition-all duration-300 hover:shadow-md ${
                   isOwn ? messageOwn : messageOther
                 }`}>
                   <div className={`text-xs font-medium mb-1 ${textMuted}`}>
                     {isOwn ? 'You' : (message.sender?.fullName || 'Unknown')} • {format(new Date(message.createdAt), 'HH:mm')}
                   </div>
                   <div className={`text-sm ${textPrimary}`}>
-                    {message.type === 'image' && message.fileUrl && (
+                  {message.type === 'image' && message.fileUrl && (
                       <img src={message.fileUrl} alt={message.content} className="max-w-full rounded-lg mb-1 max-h-64 object-cover" />
-                    )}
-                    {message.type === 'file' && (
+                  )}
+                  {message.type === 'file' && (
                       <div className="flex items-center gap-2">
-                        <Paperclip className="w-4 h-4" />
+                      <Paperclip className="w-4 h-4" />
                         <span>{message.fileName || message.content}</span>
-                      </div>
-                    )}
+                    </div>
+                  )}
                     {!['image', 'file'].includes(message.type) && (
                       <p>{message.content}</p>
                     )}
@@ -167,9 +168,9 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
               </div>
             );
           })
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
       {/* Divider */}
       <div className={`h-px ${divider}`} />
@@ -179,39 +180,39 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
         <label className={`block text-xs ${textMuted}`} htmlFor="messageInput">
           Message
         </label>
-        <textarea
+            <textarea
           id="messageInput"
-          value={inputValue}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              onSendMessage(e);
-            }
-          }}
+              value={inputValue}
+              onChange={(e) => onInputChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  onSendMessage(e);
+                }
+              }}
           placeholder="Type a message…"
           rows={3}
           className={`w-full px-3 py-2 rounded-lg ${inputBg} border ${inputBorder} ${inputText} text-sm ${inputPlaceholder} focus:outline-none focus:ring-2 ${
             isDark ? 'focus:ring-[rgba(110,168,255,0.35)]' : 'focus:ring-[rgba(37,99,235,0.35)]'
           } resize-none`}
-        />
+            />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onFileSelect}
+              <button
+                type="button"
+                onClick={onFileSelect}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${buttonBg}`}
-            >
+              >
               <Paperclip className="w-4 h-4 inline mr-1" />
               Attach
-            </button>
-            <button
-              type="button"
+              </button>
+              <button
+                type="button"
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${buttonBg}`}
-            >
+              >
               <Smile className="w-4 h-4 inline mr-1" />
               Emoji
-            </button>
+              </button>
             <button
               type="button"
               onClick={() => {}}

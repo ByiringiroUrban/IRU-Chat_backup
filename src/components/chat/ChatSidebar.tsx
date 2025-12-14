@@ -8,6 +8,7 @@ import {
   Settings, Building2, Megaphone, Sun, Moon
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import iruLogo from '@/assets/iruchatlogo.png';
 
 interface NavItem {
   id: string;
@@ -126,8 +127,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
       {/* Brand Header */}
       <div className={`p-4 border-b ${sidebarBorder}`}>
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${isDark ? 'from-cyan-400 to-blue-500' : 'from-blue-500 to-cyan-500'} flex items-center justify-center font-bold text-sm text-white shadow-lg ${isDark ? 'shadow-cyan-500/20' : 'shadow-blue-500/20'}`}>
-            IRU
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 transition-all duration-300 ease-out transform hover:scale-110">
+            <img 
+              src={iruLogo} 
+              alt="IRU Chat Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <h1 className={`font-semibold text-base ${brandText}`}>
@@ -155,7 +160,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   <button
                     key={item.id}
                     onClick={() => onNavChange(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] ${
                       isActive
                         ? `${activeBg} ${activeText} border-l-2 ${activeBorder}` 
                         : `${navInactiveText} ${navHoverBg} ${navHoverText}`

@@ -25,15 +25,15 @@ const EmptyConversation: React.FC = () => {
           {/* Large chat bubble icon in rounded square */}
           <div className={`w-24 h-24 mx-auto mb-6 rounded-2xl ${iconBg} flex items-center justify-center border-2`}>
             <MessageSquare className={`w-12 h-12 ${iconColor}`} />
-          </div>
+        </div>
           
           {/* Welcome heading */}
           <h3 className={`text-xl font-semibold ${textPrimary} mb-2`}>Welcome to Chat</h3>
           
           {/* Instruction text */}
           <p className={`text-sm ${textMuted} max-w-xs mx-auto mb-6 leading-relaxed`}>
-            Select a conversation from the list or start a new chat to begin messaging
-          </p>
+          Select a conversation from the list or start a new chat to begin messaging
+        </p>
           
           {/* Bottom hint with arrow */}
           <div className={`flex items-center justify-center ${textMuted}`}>

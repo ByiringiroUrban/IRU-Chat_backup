@@ -80,7 +80,7 @@ const ChatInfoPanel: React.FC<ChatInfoPanelProps> = ({
               <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
                 {memberCount}
               </span>
-            </div>
+                  </div>
             <div className="flex items-center justify-between">
               <span className={`text-sm ${textPrimary}`}>Pinned</span>
               <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>

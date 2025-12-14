@@ -17,6 +17,24 @@ import StatusPage from '@/components/chat/StatusPage';
 import CallsPage from '@/components/chat/CallsPage';
 import ContactsPage from '@/components/chat/ContactsPage';
 import LiveStreamPage from '@/components/chat/LiveStreamPage';
+import HistoriesPage from '@/components/chat/HistoriesPage';
+import ActionBoardPage from '@/components/chat/ActionBoardPage';
+import EnterpriseToolsPage from '@/components/chat/EnterpriseToolsPage';
+import AdvertiseMarketingPage from '@/components/chat/AdvertiseMarketingPage';
+import ThreadDocStudioPage from '@/components/chat/ThreadDocStudioPage';
+import SmartSummariesPage from '@/components/chat/SmartSummariesPage';
+import WorkflowAutomationsPage from '@/components/chat/WorkflowAutomationsPage';
+import CommandCenterPage from '@/components/chat/CommandCenterPage';
+import DignityModePage from '@/components/chat/DignityModePage';
+import ConsentControlsPage from '@/components/chat/ConsentControlsPage';
+import IdentityVerificationPage from '@/components/chat/IdentityVerificationPage';
+import ReportsModerationPage from '@/components/chat/ReportsModerationPage';
+import PrivacyCenterPage from '@/components/chat/PrivacyCenterPage';
+import LiveStudioPage from '@/components/chat/LiveStudioPage';
+import CommunityBuilderPage from '@/components/chat/CommunityBuilderPage';
+import MonetizationPage from '@/components/chat/MonetizationPage';
+import ContentLibraryPage from '@/components/chat/ContentLibraryPage';
+import CreatorAnalyticsPage from '@/components/chat/CreatorAnalyticsPage';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -648,7 +666,9 @@ const ChatPage = () => {
               onNewAction={() => toast.info('New action')}
               onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
             />
-            <StatusPage />
+            <div className="animate-fade-in">
+              <StatusPage />
+            </div>
           </>
         ) : activeNav === 'calls' ? (
           <>
@@ -661,7 +681,9 @@ const ChatPage = () => {
               onNewAction={() => toast.info('New action')}
               onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
             />
-            <CallsPage />
+            <div className="animate-fade-in">
+              <CallsPage />
+            </div>
           </>
         ) : activeNav === 'contacts' ? (
           <>
@@ -674,7 +696,9 @@ const ChatPage = () => {
               onNewAction={() => toast.info('New action')}
               onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
             />
-            <ContactsPage />
+            <div className="animate-fade-in">
+              <ContactsPage />
+            </div>
           </>
         ) : activeNav === 'live-stream' ? (
           <>
@@ -687,7 +711,265 @@ const ChatPage = () => {
               onNewAction={() => toast.info('New action')}
               onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
             />
-            <LiveStreamPage />
+            <div className="animate-fade-in">
+              <LiveStreamPage />
+            </div>
+          </>
+        ) : activeNav === 'histories' ? (
+          <>
+            {/* Top Bar for Histories */}
+            <ChatTopBar
+              title="Histories"
+              subtitle="Messages, calls, sessions, and export tools."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <HistoriesPage />
+            </div>
+          </>
+        ) : activeNav === 'action-board' ? (
+          <>
+            {/* Top Bar for Action Board */}
+            <ChatTopBar
+              title="Action Board"
+              subtitle="Tasks extracted from chats with owners, due dates, reminders."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <ActionBoardPage />
+            </div>
+          </>
+        ) : activeNav === 'enterprise-tools' ? (
+          <>
+            {/* Top Bar for Enterprise Tools */}
+            <ChatTopBar
+              title="Enterprise Tools"
+              subtitle="Org setup, RBAC, policies, audits, compliance."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <EnterpriseToolsPage />
+            </div>
+          </>
+        ) : activeNav === 'advertise' ? (
+          <>
+            {/* Top Bar for Advertise / Marketing */}
+            <ChatTopBar
+              title="Advertise / Marketing"
+              subtitle="Campaigns, placements, creatives, approvals, analytics."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <AdvertiseMarketingPage />
+            </div>
+          </>
+        ) : activeNav === 'thread-doc' ? (
+          <>
+            <ChatTopBar
+              title="Thread → Doc Studio"
+              subtitle="Convert chat threads into structured documents, wikis, and knowledge bases."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <ThreadDocStudioPage />
+            </div>
+          </>
+        ) : activeNav === 'summaries' ? (
+          <>
+            <ChatTopBar
+              title="Smart Summaries"
+              subtitle="AI-powered summaries of conversations, threads, and chat history."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <SmartSummariesPage />
+            </div>
+          </>
+        ) : activeNav === 'automations' ? (
+          <>
+            <ChatTopBar
+              title="Workflow Automations"
+              subtitle="Create automated workflows, triggers, and actions for chat interactions."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <WorkflowAutomationsPage />
+            </div>
+          </>
+        ) : activeNav === 'command-center' ? (
+          <>
+            <ChatTopBar
+              title="Command Center"
+              subtitle="Slash commands, shortcuts, and quick actions for power users."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <CommandCenterPage />
+            </div>
+          </>
+        ) : activeNav === 'dignity-mode' ? (
+          <>
+            <ChatTopBar
+              title="IRU Dignity Mode"
+              subtitle="Advanced content filtering and respectful communication tools."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <DignityModePage />
+            </div>
+          </>
+        ) : activeNav === 'consent-controls' ? (
+          <>
+            <ChatTopBar
+              title="Consent Controls"
+              subtitle="Manage your privacy preferences and data consent settings."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <ConsentControlsPage />
+            </div>
+          </>
+        ) : activeNav === 'verification' ? (
+          <>
+            <ChatTopBar
+              title="Identity & Verification"
+              subtitle="Verify your identity and manage verification methods."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <IdentityVerificationPage />
+            </div>
+          </>
+        ) : activeNav === 'moderation' ? (
+          <>
+            <ChatTopBar
+              title="Reports & Moderation"
+              subtitle="Review and manage user reports, moderation actions, and safety incidents."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <ReportsModerationPage />
+            </div>
+          </>
+        ) : activeNav === 'privacy-center' ? (
+          <>
+            <ChatTopBar
+              title="Privacy Center"
+              subtitle="Manage your privacy settings, data rights, and account security."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <PrivacyCenterPage />
+            </div>
+          </>
+        ) : activeNav === 'live-studio' ? (
+          <>
+            <ChatTopBar
+              title="Live Studio"
+              subtitle="Professional live streaming tools for creators and broadcasters."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <LiveStudioPage />
+            </div>
+          </>
+        ) : activeNav === 'communities' ? (
+          <>
+            <ChatTopBar
+              title="Community Builder"
+              subtitle="Create and manage communities, groups, and member engagement."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <CommunityBuilderPage />
+            </div>
+          </>
+        ) : activeNav === 'monetization' ? (
+          <>
+            <ChatTopBar
+              title="Monetization"
+              subtitle="Manage subscriptions, tips, revenue streams, and payment settings."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <MonetizationPage />
+            </div>
+          </>
+        ) : activeNav === 'content-library' ? (
+          <>
+            <ChatTopBar
+              title="Content Library"
+              subtitle="Organize and manage your media files, templates, and content assets."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <ContentLibraryPage />
+            </div>
+          </>
+        ) : activeNav === 'creator-analytics' ? (
+          <>
+            <ChatTopBar
+              title="Creator Analytics"
+              subtitle="Track your performance, audience insights, and content metrics."
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewAction={() => toast.info('New action')}
+              onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+            />
+            <div className="animate-fade-in">
+              <CreatorAnalyticsPage />
+            </div>
           </>
         ) : (
           <div className="flex-1 flex overflow-hidden">
