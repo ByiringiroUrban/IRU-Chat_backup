@@ -28,7 +28,7 @@ const ContactsPage: React.FC = () => {
   const divider = isDark ? 'bg-[rgba(255,255,255,0.09)]' : 'bg-[rgba(15,23,42,0.10)]';
 
   // Static favorites data
-  const favorites = ['M. Augustin', 'Design Team', 'Support'];
+  const favorites: string[] = [];
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">

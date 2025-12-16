@@ -20,7 +20,6 @@ const SmartSummariesPage: React.FC = () => {
   const tableBorder = isDark ? 'border-[rgba(255,255,255,0.09)]' : 'border-[rgba(15,23,42,0.10)]';
 
   const summaries = [
-    { chat: 'Design Team', period: 'Today', status: 'Generated' },
     { chat: 'Client Thread', period: 'This Week', status: 'Pending' },
   ];
 
@@ -47,7 +46,6 @@ const SmartSummariesPage: React.FC = () => {
                 <div className="space-y-2">
                   <label className={`block text-xs ${textMuted}`}>Select chat or thread</label>
                   <select className={`w-full px-3 py-2 rounded-lg ${cardHeaderBg} border ${cardBorder} ${textPrimary} text-sm`}>
-                    <option>Design Team</option>
                     <option>Client Thread</option>
                   </select>
                 </div>

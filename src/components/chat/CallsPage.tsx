@@ -32,7 +32,6 @@ const CallsPage: React.FC = () => {
 
   // Static recent calls data
   const recentCalls = [
-    { contact: 'Design Team', type: 'Video', when: '—', duration: '—' },
     { contact: 'Client', type: 'Voice', when: '—', duration: '—' },
   ];
 

@@ -39,11 +39,21 @@ interface Chat {
   messages: Message[];
 }
 
+interface User {
+  id: string;
+  fullName: string;
+  username?: string;
+  profilePicture?: string;
+  email: string;
+  isOnline?: boolean;
+}
+
 interface ChatListProps {
   chats: Chat[];
   selectedChat: Chat | null;
   onChatSelect: (chat: Chat) => void;
   onNewChat: () => void;
+  onUserSelect?: (user: User) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   filter: 'all' | 'unread' | 'pinned';
@@ -59,6 +69,7 @@ const ChatList: React.FC<ChatListProps> = ({
   selectedChat,
   onChatSelect,
   onNewChat,
+  onUserSelect,
   filter,
   onFilterChange,
   getChatName,
@@ -67,6 +78,8 @@ const ChatList: React.FC<ChatListProps> = ({
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = React.useState(false);
 
   // Theme-aware colors
   const cardBg = isDark ? 'bg-[#101828]' : 'bg-white';
@@ -94,6 +107,42 @@ const ChatList: React.FC<ChatListProps> = ({
     : 'hover:bg-[rgba(15,23,42,0.05)]';
 
   const [dmGroupFilter, setDmGroupFilter] = React.useState<'dms' | 'groups'>('dms');
+
+  // Load users from database when no chats exist
+  React.useEffect(() => {
+    if (chats.length === 0 && onUserSelect) {
+      loadUsers();
+    }
+  }, [chats.length, onUserSelect]);
+
+  const loadUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const authData = localStorage.getItem('iru-auth');
+      if (!authData) return;
+      
+      const parsed = JSON.parse(authData);
+      const token = parsed.token;
+      if (!token) return;
+
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data || []);
+        console.log('Loaded users from database:', data.length);
+      }
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   return (
     <section className={`w-80 flex-shrink-0 flex flex-col h-full ${cardBg} border-r ${cardBorder} rounded-none ${shadow} overflow-hidden`}>
@@ -166,89 +215,88 @@ const ChatList: React.FC<ChatListProps> = ({
 
           {/* Chat Items */}
           <div className="space-y-1">
-            {/* Static example chats for wireframe */}
             {chats.length === 0 ? (
-              <>
-                {/* Static Chat: Design Team */}
-                <div
-                  className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${chatHover}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      isDark ? 'bg-gray-600' : 'bg-gray-300'
-                    }`}>
-                      <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        DT
-                      </span>
+              <div className="space-y-2">
+                <div className={`p-4 text-center ${textMuted} text-sm border-b ${cardBorder}`}>
+                  <p className="font-medium mb-1">No chats yet</p>
+                  <p className="text-xs">Select a user below to start chatting</p>
+                </div>
+                
+                {/* Available Users from Database */}
+                {loadingUsers ? (
+                  <div className={`p-4 text-center ${textMuted} text-sm`}>
+                    Loading users...
+                  </div>
+                ) : users.length > 0 ? (
+                  <div className="space-y-1">
+                    <div className={`px-4 py-2 ${textMuted} text-xs font-medium uppercase tracking-wide`}>
+                      Available Users
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-sm font-medium ${textPrimary} truncate`}>
-                          Design Team
-                        </span>
-                        <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
-                          isDark ? 'bg-red-500 text-white' : 'bg-red-500 text-white'
-                        }`}>
-                          3
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className={`text-xs ${textMuted} truncate pr-2`}>
-                          Last message preview...
-                        </p>
-                        <span className={`text-xs ${textMuted} flex-shrink-0`}>
-                          12:30
-                        </span>
-                      </div>
-                    </div>
-        </div>
-      </div>
-
-                {/* Static Chat: M. Augustin */}
-                <div
-                  className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${chatHover}`}
-                  style={{ animationDelay: '50ms' }}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      isDark ? 'bg-gray-600' : 'bg-gray-300'
-                    }`}>
-                      <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        MA
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-sm font-medium ${textPrimary} truncate`}>
-                          M. Augustin
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className={`text-xs ${textMuted} truncate pr-2`}>
-                          Draft: "Let's...
-                        </p>
-                        <span className={`text-xs ${textMuted} flex-shrink-0`}>
-                          Yesterday
-                        </span>
-                      </div>
-                    </div>
+                    {users.map((user) => {
+                      const initials = user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                      return (
+                        <div
+                          key={user.id}
+                          onClick={() => onUserSelect?.(user)}
+                          className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${chatHover}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${
+                              isDark ? 'bg-gray-600' : 'bg-gray-300'
+                            }`}>
+                              {user.profilePicture ? (
+                                <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  {initials}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className={`text-sm font-medium ${textPrimary} truncate`}>
+                                  {user.fullName}
+                                </span>
+                                {user.isOnline && (
+                                  <span className={`w-2 h-2 rounded-full ${
+                                    isDark ? 'bg-green-400' : 'bg-green-500'
+                                  }`} title="Online" />
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <p className={`text-xs ${textMuted} truncate pr-2`}>
+                                  {user.email}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className={`p-4 text-center ${textMuted} text-sm`}>
+                    <p>No users found. Click "New Chat" to create a chat!</p>
+                  </div>
+                )}
               </div>
-            </div>
-              </>
-          ) : (
-            chats.map((chat) => {
-              const lastMessage = chat.messages[0];
+            ) : (
+            chats.map((chat, index) => {
+              const lastMessage = chat.messages?.[0];
               const isSelected = selectedChat?.id === chat.id;
-                const chatName = getChatName(chat);
-                const chatAvatar = getChatAvatar(chat);
+              const chatName = getChatName(chat);
+              const chatAvatar = getChatAvatar(chat);
               const initials = getChatInitials(chat);
 
               return (
-                  <div
+                <div
                   key={chat.id}
-                  onClick={() => onChatSelect(chat)}
-                    className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${
-                      isSelected ? chatSelected : chatHover
+                  onClick={() => {
+                    console.log('Chat clicked:', chat.id, chatName);
+                    onChatSelect(chat);
+                  }}
+                  className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.02] hover:shadow-lg animate-slide-in-left ${
+                    isSelected ? chatSelected : chatHover
                   }`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >

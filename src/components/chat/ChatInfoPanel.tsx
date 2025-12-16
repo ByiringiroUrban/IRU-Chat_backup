@@ -1,6 +1,34 @@
 import React from 'react';
 import { useTheme } from 'next-themes';
 
+interface User {
+  id: string;
+  fullName: string;
+  username?: string;
+  profilePicture?: string;
+  email?: string;
+  isOnline: boolean;
+  lastSeen?: string;
+}
+
+interface Message {
+  id: string;
+  chatId: string;
+  senderId: string;
+  content: string;
+  type: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  replyToId?: string;
+  readBy?: string[];
+  isPinned?: boolean;
+  createdAt: string;
+  sender: User;
+  replyTo?: Message;
+}
+
 interface Chat {
   id: string;
   name?: string;
@@ -19,6 +47,7 @@ interface Chat {
 
 interface ChatInfoPanelProps {
   chat: Chat | null;
+  messages: Message[];
   onMute: () => void;
   onArchive: () => void;
   onBlockReport: () => void;
@@ -28,6 +57,7 @@ interface ChatInfoPanelProps {
 
 const ChatInfoPanel: React.FC<ChatInfoPanelProps> = ({
   chat,
+  messages,
   onMute,
   onArchive,
   onBlockReport,
@@ -52,9 +82,10 @@ const ChatInfoPanel: React.FC<ChatInfoPanelProps> = ({
     : 'bg-[rgba(220,38,38,0.12)] border-[rgba(220,38,38,0.35)] text-[#dc2626] hover:bg-[rgba(220,38,38,0.20)]';
   const divider = isDark ? 'bg-[rgba(255,255,255,0.09)]' : 'bg-[rgba(15,23,42,0.10)]';
 
-  const memberCount = chat?.members?.length || 5;
-  const pinnedCount = 2;
-  const sharedFilesCount = 14;
+  // Calculate real data from chat and messages
+  const memberCount = chat?.members?.length || 0;
+  const pinnedCount = messages.filter(msg => msg.isPinned && !msg.isDeleted).length;
+  const sharedFilesCount = messages.filter(msg => msg.fileUrl && !msg.isDeleted).length;
 
   return (
     <section className={`w-80 flex-shrink-0 flex flex-col h-full ${cardBg} border-l ${cardBorder} rounded-none ${shadow} overflow-hidden`}>

@@ -60,6 +60,8 @@ interface Message {
   fileType?: string;
   replyToId?: string;
   readBy?: string[];
+  isPinned?: boolean;
+  isDeleted?: boolean;
   createdAt: string;
   sender: User;
   replyTo?: Message;
@@ -198,13 +200,46 @@ const ChatPage = () => {
 
   const currentUserId = getCurrentUserId() || 'current-user';
 
+  // Clear localStorage on mount to remove static chats (one-time)
+  useEffect(() => {
+    // Clear localStorage once on mount to remove any static chats
+    const clearStaticData = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEYS.CHATS);
+        if (stored) {
+          const parsed: Chat[] = JSON.parse(stored);
+          const hasStatic = parsed.some(chat => {
+            const name = (chat.name || '').toLowerCase();
+            const id = (chat.id || '').toLowerCase();
+            return name.includes('design team') || 
+                   name.includes('m. augustin') ||
+                   id.includes('static-');
+          });
+          if (hasStatic) {
+            console.log('Clearing static chats from localStorage');
+            localStorage.removeItem(STORAGE_KEYS.CHATS);
+            localStorage.removeItem('iru-chat-messages');
+          }
+        }
+      } catch (e) {
+        // Ignore errors
+      }
+    };
+    clearStaticData();
+  }, []);
+
   // Initialize Socket.IO connection
   useEffect(() => {
     setMounted(true);
     const token = getAuthToken();
     
+    if (!token) {
+      console.log('No auth token, skipping socket connection');
+      return;
+    }
+    
     const newSocket = io(API_BASE_URL, {
-      auth: token ? { token } : undefined,
+      auth: { token },
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,
@@ -213,15 +248,15 @@ const ChatPage = () => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('✅ Socket connected');
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
+      console.log('❌ Socket disconnected');
     });
 
     newSocket.on('connect_error', (error) => {
-      console.log('Socket connection error (using local state):', error.message);
+      console.error('❌ Socket connection error:', error.message);
     });
 
     newSocket.on('user:online', ({ userId }: { userId: string }) => {
@@ -237,6 +272,8 @@ const ChatPage = () => {
     });
 
     newSocket.on('message:new', (message: Message) => {
+      console.log('Received new message via socket:', message);
+      
       const formattedMessage: Message = {
         ...message,
         sender: message.sender || {
@@ -248,31 +285,62 @@ const ChatPage = () => {
         },
       };
 
+      // Update messages if this is the selected chat
       setMessages(prev => {
-        if (formattedMessage.chatId !== selectedChat?.id) return prev;
+        // Only update if this message is for the currently selected chat
+        if (formattedMessage.chatId !== selectedChat?.id) {
+          // Still update chat list even if not selected
+          setChats(prevChats => {
+            const updated = prevChats.map(chat => 
+              chat.id === formattedMessage.chatId 
+                ? { 
+                    ...chat, 
+                    messages: [formattedMessage],
+                    unreadCount: formattedMessage.senderId !== getCurrentUserId() 
+                      ? (chat.unreadCount || 0) + 1 
+                      : 0
+                  }
+                : chat
+            );
+            saveChatsToStorage(updated);
+            return updated;
+          });
+          return prev;
+        }
         
-        const hasTemp = prev.some(m => m.id.startsWith('temp-'));
+        // Check if message already exists
+        const exists = prev.find(m => m.id === formattedMessage.id);
+        if (exists) {
+          return prev;
+        }
+        
+        // Replace temp message if exists, otherwise add new
+        const hasTemp = prev.some(m => m.id.startsWith('temp-') && m.content === formattedMessage.content);
         let updated: Message[];
+        
         if (hasTemp) {
+          // Replace temp message with real one
           updated = prev.map(m => 
             m.id.startsWith('temp-') && m.content === formattedMessage.content 
               ? formattedMessage 
               : m
           ).filter(m => !m.id.startsWith('temp-') || m.id === formattedMessage.id);
-          
-          if (!updated.find(m => m.id === formattedMessage.id)) {
-            updated.push(formattedMessage);
-          }
-        } else if (!prev.find(m => m.id === formattedMessage.id)) {
-          updated = [...prev, formattedMessage];
         } else {
-          updated = prev;
+          // Add new message
+          updated = [...prev, formattedMessage];
         }
         
+        // Sort by creation time
+        updated.sort((a, b) => 
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        
+        // Save to localStorage
         saveMessagesToStorage(formattedMessage.chatId, updated);
         return updated;
       });
       
+      // Update chat list
       setChats(prev => {
         const updated = prev.map(chat => 
           chat.id === formattedMessage.chatId 
@@ -288,6 +356,29 @@ const ChatPage = () => {
         saveChatsToStorage(updated);
         return updated;
       });
+    });
+
+    // Handle message sent confirmation
+    newSocket.on('message:sent', (message: Message) => {
+      console.log('Message sent confirmation:', message);
+      // Replace temp message with confirmed message
+      setMessages(prev => {
+        const tempMsg = prev.find(m => m.id.startsWith('temp-') && m.content === message.content);
+        if (tempMsg) {
+          const updated = prev.map(m => 
+            m.id === tempMsg.id ? message : m
+          );
+          saveMessagesToStorage(message.chatId, updated);
+          return updated;
+        }
+        return prev;
+      });
+    });
+
+    // Handle message errors
+    newSocket.on('message:error', ({ error }: { error: string }) => {
+      console.error('Message error from socket:', error);
+      toast.error(error || 'Failed to send message');
     });
 
     newSocket.on('typing:start', ({ userId, chatId }: { userId: string; chatId: string }) => {
@@ -327,12 +418,51 @@ const ChatPage = () => {
     };
   }, []);
 
-  // Load chats
+  // Load chats from API only (no static chats, no localStorage cache)
   useEffect(() => {
+    // Clear localStorage completely to remove any static chats
+    const clearAllStaticData = () => {
+      try {
+        console.log('Clearing localStorage to remove static chats');
+        // Check if there are static chats in localStorage
+        const storedChats = localStorage.getItem(STORAGE_KEYS.CHATS);
+        if (storedChats) {
+          try {
+            const parsed: Chat[] = JSON.parse(storedChats);
+            const staticChatNames = ['Design Team', 'M. Augustin'];
+            const staticChatIds = ['static-'];
+            const hasStatic = parsed.some(chat => {
+              const name = (chat.name || '').toLowerCase();
+              const id = (chat.id || '').toLowerCase();
+              return staticChatNames.some(s => name.includes(s.toLowerCase())) ||
+                     staticChatIds.some(s => id.includes(s));
+            });
+            
+            if (hasStatic) {
+              console.log('Found static chats in localStorage, clearing all data');
+              localStorage.removeItem(STORAGE_KEYS.CHATS);
+              localStorage.removeItem('iru-chat-messages');
+            }
+          } catch (e) {
+            // If parsing fails, clear anyway
+            localStorage.removeItem(STORAGE_KEYS.CHATS);
+            localStorage.removeItem('iru-chat-messages');
+          }
+        }
+      } catch (error) {
+        console.error('Error clearing localStorage:', error);
+      }
+    };
+
+    // Clear static chats first
+    clearAllStaticData();
+
+    // Load chats from API only (never from localStorage)
     const loadChats = async () => {
       try {
         const token = getAuthToken();
         if (!token) {
+          console.log('No auth token, cannot load chats from API.');
           setChats([]);
           return;
         }
@@ -343,20 +473,33 @@ const ChatPage = () => {
 
         if (response.ok) {
           const data = await response.json();
-          const formattedChats: Chat[] = (data || []).map((chat: any) => ({
+          const apiChats: Chat[] = (data || []).map((chat: any) => ({
             ...chat,
             messages: chat.messages || [],
             members: chat.members || [],
           }));
-          setChats(formattedChats);
-          if (formattedChats.length > 0) {
-            saveChatsToStorage(formattedChats);
-          }
+
+          // Filter out any static chats that might come from API (just in case)
+          const filteredChats = apiChats.filter(chat => {
+            const name = (chat.name || '').toLowerCase();
+            const id = (chat.id || '').toLowerCase();
+            return !name.includes('design team') && 
+                   !name.includes('m. augustin') &&
+                   !id.includes('static-');
+          });
+
+          // Only use filtered API chats (no static chats)
+          setChats(filteredChats);
+          saveChatsToStorage(filteredChats);
+          console.log('Loaded chats from API:', filteredChats.length);
         } else {
+          // API failed, set to empty
+          console.log('API failed, no chats available');
           setChats([]);
         }
       } catch (error) {
-        console.error('Error loading chats:', error);
+        console.error('Error loading chats from API:', error);
+        // On error, set to empty
         setChats([]);
       }
     };
@@ -366,12 +509,37 @@ const ChatPage = () => {
 
   // Load messages when chat is selected
   useEffect(() => {
-    if (!selectedChat) return;
+    if (!selectedChat) {
+      setMessages([]);
+      return;
+    }
 
+    // Always load from localStorage first for immediate display
+    const loadFromStorage = () => {
+      try {
+        const stored = localStorage.getItem('iru-chat-messages');
+        const allMessages: Record<string, Message[]> = stored ? JSON.parse(stored) : {};
+        const chatMessages = allMessages[selectedChat.id] || [];
+        // Always set messages from localStorage first (even if empty)
+        setMessages(chatMessages);
+        console.log('Loaded messages from localStorage:', chatMessages.length);
+        return chatMessages;
+      } catch (error) {
+        console.error('Error loading messages from storage:', error);
+        setMessages([]);
+        return [];
+      }
+    };
+
+    // Load from localStorage immediately
+    const storageMessages = loadFromStorage();
+
+    // Join socket room
     if (socket) {
       socket.emit('chat:join', selectedChat.id);
     }
 
+    // Then load from API and merge
     const loadMessages = async () => {
       try {
         const token = getAuthToken();
@@ -401,19 +569,21 @@ const ChatPage = () => {
                 isOnline: false,
               },
             }));
-            setMessages(apiMessages);
-            if (apiMessages.length > 0) {
-              saveMessagesToStorage(selectedChat.id, apiMessages);
+            
+            // Merge with localStorage messages (localStorage takes priority for duplicates)
+            const mergedMessages = mergeMessages(storageMessages, apiMessages);
+            setMessages(mergedMessages);
+            if (mergedMessages.length > 0) {
+              saveMessagesToStorage(selectedChat.id, mergedMessages);
             }
           } else {
-            setMessages([]);
+            // API failed, keep localStorage messages
+            console.log('API failed, keeping localStorage messages');
           }
-        } else {
-          setMessages([]);
         }
       } catch (error) {
         console.error('Error loading messages:', error);
-        setMessages([]);
+        // Keep localStorage messages on error
       }
     };
 
@@ -447,26 +617,254 @@ const ChatPage = () => {
     }, 1000);
   };
 
+  // Handle file selection
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    console.log('File selected:', file.name, file.type, file.size);
+    
+    if (!selectedChat) {
+      toast.error('Please select a chat first');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    setSelectedFile(file);
+    
+    // Auto-send file if no text input
+    if (!inputValue.trim()) {
+      console.log('Auto-sending file since no text input');
+      await uploadAndSendFile(file);
+    } else {
+      console.log('File selected, will send with text message');
+    }
+  };
+
+  // Upload file and send message
+  const uploadAndSendFile = async (file: File) => {
+    if (!selectedChat) return;
+
+    try {
+      // Show uploading state
+      const tempMessageId = `temp-${Date.now()}`;
+      const currentUser = getCurrentUser();
+      const objectUrl = URL.createObjectURL(file);
+      
+      const tempMessage: Message = {
+        id: tempMessageId,
+        chatId: selectedChat.id,
+        senderId: currentUserId,
+        content: 'Uploading...',
+        type: file.type.startsWith('image/') ? 'image' : 
+              file.type.startsWith('video/') ? 'video' :
+              file.type.startsWith('audio/') ? 'audio' : 'file',
+        fileUrl: objectUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        createdAt: new Date().toISOString(),
+        sender: {
+          id: currentUserId,
+          fullName: currentUser?.fullName || 'You',
+          username: currentUser?.username || 'you',
+          email: currentUser?.email || '',
+          profilePicture: currentUser?.profilePicture,
+          isOnline: true,
+        },
+        readBy: [],
+      };
+
+      setMessages(prev => {
+        const updated = [...prev, tempMessage];
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
+      });
+
+      let fileUrl = objectUrl;
+      let fileData: any = null;
+
+
+      // For real chats, upload to backend
+      const token = getAuthToken();
+      if (!token) {
+        toast.error('Please login to send files');
+        // Remove temp message
+        setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload file (don't set Content-Type header - browser will set it with boundary)
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/files/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type - browser will set it automatically with boundary for FormData
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('File upload failed:', errorText);
+        // For static chats or if upload fails, use data URL as fallback
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string;
+          fileUrl = dataUrl;
+          
+          const finalMessage: Message = {
+            ...tempMessage,
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            content: file.name,
+            fileUrl: dataUrl,
+          };
+          
+          setMessages(prev => {
+            const updated = prev.map(msg => 
+              msg.id === tempMessageId ? finalMessage : msg
+            );
+            saveMessagesToStorage(selectedChat.id, updated);
+            return updated;
+          });
+        };
+        reader.readAsDataURL(file);
+        toast.warning('File saved locally (upload failed)');
+        return;
+      }
+
+      fileData = await uploadResponse.json();
+      console.log('File uploaded successfully:', fileData);
+      fileUrl = fileData.url || fileData.id || objectUrl;
+
+      // Send message via socket or API with file
+      try {
+        const messageData = {
+          chatId: selectedChat.id,
+          content: file.name,
+          type: file.type.startsWith('image/') ? 'image' : 
+                file.type.startsWith('video/') ? 'video' :
+                file.type.startsWith('audio/') ? 'audio' : 'file',
+          fileUrl: fileUrl,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+        };
+
+        if (socket && socket.connected) {
+          socket.emit('message:send', messageData);
+          console.log('File message sent via socket');
+        } else {
+          // Fallback: send via API
+          console.log('Socket not connected, using API for file message');
+          const response = await fetch(`${API_BASE_URL}/api/chats/${selectedChat.id}/messages`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(messageData),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to send file message');
+          }
+
+          const newMessage = await response.json();
+          console.log('File message sent via API:', newMessage);
+          
+          // Update temp message with actual message
+          setMessages(prev => {
+            const updated = prev.map(msg => 
+              msg.id === tempMessageId 
+                ? { ...newMessage, sender: newMessage.sender || msg.sender }
+                : msg
+            );
+            saveMessagesToStorage(selectedChat.id, updated);
+            return updated;
+          });
+        }
+      } catch (error: any) {
+        console.error('Error sending file message:', error);
+        toast.error(error.message || 'Failed to send file message');
+      }
+
+      // Update temp message with actual file URL
+      setMessages(prev => {
+        const updated = prev.map(msg => 
+          msg.id === tempMessageId 
+            ? { ...msg, fileUrl: fileUrl, content: file.name }
+            : msg
+        );
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
+      });
+
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Failed to upload file');
+      
+      // Remove failed message
+      setMessages(prev => {
+        const updated = prev.filter(msg => msg.id !== `temp-${Date.now()}`);
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
+      });
+    }
+  };
+
   // Send message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!inputValue.trim() && !selectedFile) || !selectedChat) return;
+    
+    if (!selectedChat) {
+      toast.error('Please select a chat first');
+      return;
+    }
+    
+    if (!inputValue.trim() && !selectedFile) {
+      toast.error('Please enter a message or select a file');
+      return;
+    }
+    
+    console.log('Sending message:', { 
+      hasText: !!inputValue.trim(), 
+      hasFile: !!selectedFile, 
+      chatId: selectedChat.id 
+    });
 
     const messageContent = inputValue.trim();
     const currentUser = getCurrentUser();
-    
+
+    // If there's a file, upload it first
+    if (selectedFile) {
+      await uploadAndSendFile(selectedFile);
+      if (!messageContent) {
+        setInputValue('');
+        return;
+      }
+    }
+
+    // Create temp message for immediate UI feedback
+    const tempMessageId = `temp-${Date.now()}`;
     const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
+      id: tempMessageId,
       chatId: selectedChat.id,
       senderId: currentUserId,
-      content: messageContent || selectedFile?.name || '',
-      type: selectedFile ? (
-        selectedFile.type.startsWith('image/') ? 'image' : 
-        selectedFile.type.startsWith('video/') ? 'video' :
-        selectedFile.type.startsWith('audio/') ? 'audio' : 'file'
-      ) : 'text',
-      fileUrl: selectedFile ? URL.createObjectURL(selectedFile) : undefined,
-      fileName: selectedFile?.name,
+      content: messageContent,
+      type: 'text',
       createdAt: new Date().toISOString(),
       sender: {
         id: currentUserId,
@@ -496,18 +894,83 @@ const ChatPage = () => {
     });
 
     setInputValue('');
-    setSelectedFile(null);
 
     if (isTyping && socket) {
       setIsTyping(false);
       socket.emit('typing:stop', selectedChat.id);
     }
 
-    if (socket && socket.connected) {
-      socket.emit('message:send', {
-        chatId: selectedChat.id,
-        content: messageContent,
-        type: 'text',
+    // Send message via socket or API
+    try {
+
+      const token = getAuthToken();
+      if (!token) {
+        toast.error('Please login to send messages');
+        return;
+      }
+
+      // Try socket first, fallback to API for real chats
+      if (socket && socket.connected) {
+        socket.emit('message:send', {
+          chatId: selectedChat.id,
+          content: messageContent,
+          type: 'text',
+        });
+        console.log('Message sent via socket');
+      } else {
+        // Fallback: send via API if socket not connected
+        console.log('Socket not connected, using API fallback');
+        const response = await fetch(`${API_BASE_URL}/api/chats/${selectedChat.id}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: messageContent,
+            type: 'text',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to send message');
+        }
+
+        const newMessage = await response.json();
+        console.log('Message sent via API:', newMessage);
+        
+        // Add the message to the list
+        setMessages(prev => {
+          const updated = [...prev.filter(m => m.id !== tempMessageId), {
+            ...newMessage,
+            sender: newMessage.sender || tempMessage.sender,
+          }];
+          // Always save to localStorage
+          saveMessagesToStorage(selectedChat.id, updated);
+          return updated;
+        });
+        
+        // Update chat list with the new message
+        setChats(prev => {
+          const updated = prev.map(c => 
+            c.id === selectedChat.id 
+              ? { ...c, messages: [newMessage], unreadCount: 0 }
+              : c
+          );
+          saveChatsToStorage(updated);
+          return updated;
+        });
+      }
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast.error(error.message || 'Failed to send message');
+      
+      // Remove failed temp message
+      setMessages(prev => {
+        const updated = prev.filter(msg => msg.id !== tempMessageId);
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
       });
     }
   };
@@ -560,28 +1023,216 @@ const ChatPage = () => {
 
   const sendVoiceMessage = async () => {
     if (!audioBlob || !selectedChat) return;
-    
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
-      chatId: selectedChat.id,
-      senderId: currentUserId,
-      content: 'Voice message',
-      type: 'audio',
-      fileUrl: URL.createObjectURL(audioBlob),
-      createdAt: new Date().toISOString(),
-      sender: getCurrentUser(),
-      readBy: [],
-    };
 
-    setMessages(prev => [...prev, tempMessage]);
-    setAudioBlob(null);
-    setRecordingTime(0);
+    try {
+      // Show uploading state
+      const tempMessageId = `temp-${Date.now()}`;
+      const currentUser = getCurrentUser();
+      const objectUrl = URL.createObjectURL(audioBlob);
+      const audioFile = new File([audioBlob], `voice-${Date.now()}.webm`, { type: 'audio/webm' });
+      
+      const tempMessage: Message = {
+        id: tempMessageId,
+        chatId: selectedChat.id,
+        senderId: currentUserId,
+        content: 'Voice message',
+        type: 'audio',
+        fileUrl: objectUrl,
+        fileName: audioFile.name,
+        fileSize: audioBlob.size,
+        fileType: 'audio/webm',
+        createdAt: new Date().toISOString(),
+        sender: {
+          id: currentUserId,
+          fullName: currentUser?.fullName || 'You',
+          username: currentUser?.username || 'you',
+          email: currentUser?.email || '',
+          profilePicture: currentUser?.profilePicture,
+          isOnline: true,
+        },
+        readBy: [],
+      };
+
+      setMessages(prev => {
+        const updated = [...prev, tempMessage];
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
+      });
+
+      let fileUrl = objectUrl;
+      let fileData: any = null;
+
+
+      // For real chats, upload to backend
+      const token = getAuthToken();
+      if (!token) {
+        toast.error('Please login to send voice messages');
+        // Remove temp message
+        setMessages(prev => prev.filter(msg => msg.id !== tempMessageId));
+        return;
+      }
+
+      // Upload audio file
+      const formData = new FormData();
+      formData.append('file', audioFile);
+
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/files/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        // If upload fails, use data URL as fallback
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string;
+          fileUrl = dataUrl;
+          
+          const finalMessage: Message = {
+            ...tempMessage,
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            fileUrl: dataUrl,
+          };
+          
+          setMessages(prev => {
+            const updated = prev.map(msg => 
+              msg.id === tempMessageId ? finalMessage : msg
+            );
+            saveMessagesToStorage(selectedChat.id, updated);
+            return updated;
+          });
+        };
+        reader.readAsDataURL(audioFile);
+        toast.warning('Voice message saved locally (upload failed)');
+        setAudioBlob(null);
+        setRecordingTime(0);
+        return;
+      }
+
+      fileData = await uploadResponse.json();
+      console.log('Voice uploaded successfully:', fileData);
+      fileUrl = fileData.url || fileData.id || objectUrl;
+
+      // Send message via socket or API
+      try {
+        const messageData = {
+          chatId: selectedChat.id,
+          content: 'Voice message',
+          type: 'audio',
+          fileUrl: fileUrl,
+          fileName: audioFile.name,
+          fileSize: audioBlob.size,
+          fileType: 'audio/webm',
+        };
+
+        if (socket && socket.connected) {
+          socket.emit('message:send', messageData);
+          console.log('Voice message sent via socket');
+        } else {
+          // Fallback: send via API
+          console.log('Socket not connected, using API for voice message');
+          const response = await fetch(`${API_BASE_URL}/api/chats/${selectedChat.id}/messages`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(messageData),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to send voice message');
+          }
+
+          const newMessage = await response.json();
+          console.log('Voice message sent via API:', newMessage);
+          
+          // Update temp message with actual message
+          setMessages(prev => {
+            const updated = prev.map(msg => 
+              msg.id === tempMessageId 
+                ? { ...newMessage, sender: newMessage.sender || msg.sender }
+                : msg
+            );
+            saveMessagesToStorage(selectedChat.id, updated);
+            return updated;
+          });
+        }
+      } catch (error: any) {
+        console.error('Error sending voice message:', error);
+        toast.error(error.message || 'Failed to send voice message');
+      }
+
+      // Update temp message with actual file URL
+      setMessages(prev => {
+        const updated = prev.map(msg => 
+          msg.id === tempMessageId 
+            ? { ...msg, fileUrl: fileUrl }
+            : msg
+        );
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
+      });
+
+      setAudioBlob(null);
+      setRecordingTime(0);
+      toast.success('Voice message sent');
+    } catch (error) {
+      console.error('Error sending voice message:', error);
+      toast.error('Failed to send voice message');
+      
+      // Remove failed message
+      setMessages(prev => {
+        const updated = prev.filter(msg => !msg.id.startsWith('temp-') || msg.content !== 'Voice message');
+        saveMessagesToStorage(selectedChat.id, updated);
+        return updated;
+      });
+    }
   };
 
   const formatRecordingTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Delete message
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!selectedChat) return;
+
+    try {
+      // Delete via API
+      const token = getAuthToken();
+      if (!token) {
+        toast.error('Please login to delete messages');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/chats/${selectedChat.id}/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setMessages(prev => {
+          const updated = prev.filter(msg => msg.id !== messageId);
+          saveMessagesToStorage(selectedChat.id, updated);
+          return updated;
+        });
+        toast.success('Message deleted');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to delete message');
+      }
+    } catch (error: any) {
+      console.error('Error deleting message:', error);
+      toast.error(error.message || 'Failed to delete message');
+    }
   };
 
   // Helper functions
@@ -633,8 +1284,10 @@ const ChatPage = () => {
       <input
         type="file"
         ref={fileInputRef}
-        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+        onChange={handleFileChange}
         className="hidden"
+        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+        multiple={false}
       />
 
       {/* Left Sidebar - Navigation */}
@@ -977,7 +1630,82 @@ const ChatPage = () => {
             <ChatList
               chats={filteredChats}
               selectedChat={selectedChat}
-              onChatSelect={setSelectedChat}
+              onChatSelect={async (chat) => {
+                console.log('Selecting chat:', chat.id, chat.name || 'Unnamed chat', chat);
+                if (!chat || !chat.id) {
+                  console.error('Invalid chat object:', chat);
+                  toast.error('Invalid chat selection');
+                  return;
+                }
+                
+                // Set the selected chat
+                setSelectedChat(chat);
+                
+                // Clear input when switching chats
+                setInputValue('');
+                setSelectedFile(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
+              }}
+              onUserSelect={async (user) => {
+                // Create a one-to-one chat with the selected user
+                try {
+                  const token = getAuthToken();
+                  if (!token) {
+                    toast.error('Please login to start a chat');
+                    return;
+                  }
+
+                  toast.info('Creating chat...');
+                  
+                  const response = await fetch(`${API_BASE_URL}/api/chats`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      type: 'one-to-one',
+                      memberIds: [user.id],
+                    }),
+                  });
+
+                  if (response.ok) {
+                    const newChat = await response.json();
+                    console.log('Chat created:', newChat);
+                    
+                    // Format the new chat to ensure it has all required fields
+                    const formattedNewChat: Chat = {
+                      ...newChat,
+                      messages: newChat.messages || [],
+                      members: newChat.members || [],
+                    };
+                    
+                    // Add the new chat to the existing chats list
+                    setChats(prev => {
+                      const updated = [...prev, formattedNewChat];
+                      saveChatsToStorage(updated);
+                      return updated;
+                    });
+                    
+                    // Select the newly created chat immediately
+                    setSelectedChat(formattedNewChat);
+                    toast.success(`Chat with ${user.fullName} created!`);
+                    
+                    // Optionally reload all chats to ensure consistency
+                    // But don't wait for it - use the chat we just created
+                  } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || errorData.message || 'Failed to create chat';
+                    console.error('Chat creation error:', errorData);
+                    throw new Error(errorMessage);
+                  }
+                } catch (error: any) {
+                  console.error('Error creating chat:', error);
+                  toast.error(error.message || 'Failed to create chat');
+                }
+              }}
               onNewChat={() => setShowNewChatModal(true)}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -1018,7 +1746,13 @@ const ChatPage = () => {
                   onCancelRecording={cancelRecording}
                   onSendVoice={sendVoiceMessage}
                   audioBlob={audioBlob}
-                  onFileSelect={() => fileInputRef.current?.click()}
+                  onFileSelect={() => {
+                    console.log('File select clicked');
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  onDeleteMessage={handleDeleteMessage}
                   isMessageRead={isMessageRead}
                   formatRecordingTime={formatRecordingTime}
                   chatName={selectedChat ? getChatName(selectedChat) : undefined}
@@ -1029,6 +1763,7 @@ const ChatPage = () => {
                 <div className="hidden xl:flex h-full">
                   <ChatInfoPanel
                     chat={selectedChat}
+                    messages={messages}
                     onMute={() => toast.info('Mute clicked')}
                     onArchive={() => toast.info('Archive clicked')}
                     onBlockReport={() => toast.info('Block/Report clicked')}
@@ -1046,41 +1781,40 @@ const ChatPage = () => {
       <NewChatModal
         isOpen={showNewChatModal}
         onClose={() => setShowNewChatModal(false)}
-        onChatCreated={async (chatId) => {
+        onChatCreated={(newChat) => {
           try {
-            const token = getAuthToken();
-            if (!token) return;
+            // Format the new chat to ensure it has all required fields
+            const formattedChat: Chat = {
+              ...newChat,
+              messages: newChat.messages || [],
+              members: newChat.members || [],
+            };
             
-            const response = await fetch(`${API_BASE_URL}/api/chats`, {
-              headers: { 'Authorization': `Bearer ${token}` },
+            // Add the new chat to the existing chats list
+            setChats(prev => {
+              // Check if chat already exists
+              const exists = prev.find(c => c.id === formattedChat.id);
+              if (exists) {
+                // Update existing chat
+                const updated = prev.map(c => 
+                  c.id === formattedChat.id ? formattedChat : c
+                );
+                saveChatsToStorage(updated);
+                return updated;
+              } else {
+                // Add new chat
+                const updated = [...prev, formattedChat];
+                saveChatsToStorage(updated);
+                return updated;
+              }
             });
             
-            if (response.ok) {
-              const apiChats = await response.json();
-              const chatMap = new Map<string, Chat>();
-              chats.forEach(chat => chatMap.set(chat.id, chat));
-              
-              apiChats.forEach((chat: Chat) => {
-                const existing = chatMap.get(chat.id);
-                if (existing) {
-                  const mergedMessages = mergeMessages(existing.messages, chat.messages);
-                  chatMap.set(chat.id, { ...existing, ...chat, messages: mergedMessages });
-                } else {
-                  chatMap.set(chat.id, chat);
-                }
-              });
-              
-              const updatedChats = Array.from(chatMap.values());
-              setChats(updatedChats);
-              saveChatsToStorage(updatedChats);
-              
-              const newChat = updatedChats.find((c: Chat) => c.id === chatId);
-              if (newChat) {
-                setSelectedChat(newChat);
-              }
-            }
+            // Select the newly created chat
+            setSelectedChat(formattedChat);
+            toast.success('Chat created successfully!');
           } catch (error) {
-            console.error('Error loading chats:', error);
+            console.error('Error handling created chat:', error);
+            toast.error('Failed to add chat to list');
           }
         }}
       />

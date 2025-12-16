@@ -23,7 +23,6 @@ const ThreadDocStudioPage: React.FC = () => {
   const tableBorder = isDark ? 'border-[rgba(255,255,255,0.09)]' : 'border-[rgba(15,23,42,0.10)]';
 
   const documents = [
-    { name: 'Meeting Notes', source: 'Design Team Chat', updated: '—' },
     { name: 'Project Brief', source: 'Client Thread', updated: '—' },
   ];
 
@@ -58,7 +57,6 @@ const ThreadDocStudioPage: React.FC = () => {
                 <div className="space-y-2">
                   <label className={`block text-xs ${textMuted}`}>Select thread</label>
                   <select className={`w-full px-3 py-2 rounded-lg ${cardHeaderBg} border ${cardBorder} ${textPrimary} text-sm`}>
-                    <option>Design Team Chat</option>
                     <option>Client Thread</option>
                   </select>
                 </div>

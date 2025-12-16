@@ -14,7 +14,7 @@ interface User {
 interface NewChatModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onChatCreated: (chatId: string) => void;
+  onChatCreated: (chat: any) => void;
 }
 
 const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onChatCreated }) => {
@@ -128,11 +128,17 @@ const NewChatModal: React.FC<NewChatModalProps> = ({ isOpen, onClose, onChatCrea
 
       if (response.ok) {
         const chat = await response.json();
-        onChatCreated(chat.id);
+        onChatCreated(chat);
         onClose();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.message || 'Failed to create chat';
+        console.error('Chat creation error:', errorData);
+        alert(errorMessage); // Show error to user
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating chat:', error);
+      alert(error.message || 'Failed to create chat. Please try again.');
     } finally {
       setLoading(false);
     }

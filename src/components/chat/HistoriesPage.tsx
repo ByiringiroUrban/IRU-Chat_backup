@@ -30,7 +30,6 @@ const HistoriesPage: React.FC = () => {
 
   // Static data
   const messageHistory = [
-    { chat: 'Design Team', snippet: '"Wireframe..."', date: '' },
     { chat: 'Client', snippet: '"Proposal..."', date: '' },
   ];
 

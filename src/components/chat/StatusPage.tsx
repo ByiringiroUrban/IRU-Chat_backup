@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Clock } from 'lucide-react';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+interface StatusData {
+  status: string;
+  customStatus?: string | null;
+  statusExpiresAt?: string | null;
+  showLastSeen: boolean;
+  sendReadReceipts: boolean;
+  allowStatusVisibility: boolean;
+  autoAway: boolean;
+}
+
+interface StatusHistoryEntry {
+  id: string;
+  time: string;
+  status: string;
+  note: string;
+}
 
 const StatusPage: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [presence, setPresence] = useState<'online' | 'away' | 'dnd' | 'invisible'>('online');
   const [customStatus, setCustomStatus] = useState('');
   const [statusExpiry, setStatusExpiry] = useState('30 min');
@@ -12,13 +35,154 @@ const StatusPage: React.FC = () => {
   const [sendReadReceipts, setSendReadReceipts] = useState(true);
   const [allowStatusVisibility, setAllowStatusVisibility] = useState(false);
   const [autoAway, setAutoAway] = useState(true);
+  const [statusHistory, setStatusHistory] = useState<StatusHistoryEntry[]>([]);
 
-  // Static status history data
-  const statusHistory = [
-    { time: '—', status: 'Online', note: '—' },
-    { time: '—', status: 'Away', note: 'Lunch' },
-    { time: '—', status: 'DND', note: 'Client call' },
-  ];
+  // Get auth token
+  const getAuthToken = () => {
+    try {
+      const authData = localStorage.getItem('iru-auth');
+      if (!authData) return null;
+      const parsed = JSON.parse(authData);
+      return parsed.token;
+    } catch (error) {
+      console.error('Error getting auth token:', error);
+      return null;
+    }
+  };
+
+  // Load status data
+  useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        setLoading(true);
+        const token = getAuthToken();
+        if (!token) {
+          console.log('No auth token, cannot load status');
+          setLoading(false);
+          return;
+        }
+
+        // Load status and privacy settings
+        const statusResponse = await fetch(`${API_BASE_URL}/api/status`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (statusResponse.ok) {
+          const data: StatusData = await statusResponse.json();
+          setPresence((data.status as any) || 'online');
+          setCustomStatus(data.customStatus || '');
+          setShowLastSeen(data.showLastSeen ?? true);
+          setSendReadReceipts(data.sendReadReceipts ?? true);
+          setAllowStatusVisibility(data.allowStatusVisibility ?? false);
+          setAutoAway(data.autoAway ?? true);
+
+          // Calculate status expiry from statusExpiresAt
+          if (data.statusExpiresAt) {
+            const expiresAt = new Date(data.statusExpiresAt);
+            const now = new Date();
+            const diffMs = expiresAt.getTime() - now.getTime();
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            if (diffMins <= 30) {
+              setStatusExpiry('30 min');
+            } else if (diffMins <= 60) {
+              setStatusExpiry('1 hour');
+            } else {
+              setStatusExpiry('Today');
+            }
+          }
+        }
+
+        // Load status history
+        const historyResponse = await fetch(`${API_BASE_URL}/api/status/history?limit=10`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json();
+          setStatusHistory(historyData.history || []);
+        }
+      } catch (error) {
+        console.error('Error loading status:', error);
+        toast.error('Failed to load status settings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStatus();
+  }, []);
+
+  // Save status changes
+  const saveStatus = async () => {
+    try {
+      setSaving(true);
+      const token = getAuthToken();
+      if (!token) {
+        toast.error('Please login to update status');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: presence,
+          customStatus: customStatus || null,
+          statusExpiry: customStatus ? statusExpiry : null,
+          showLastSeen,
+          sendReadReceipts,
+          allowStatusVisibility,
+          autoAway,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Status updated successfully');
+        // Reload status history
+        const historyResponse = await fetch(`${API_BASE_URL}/api/status/history?limit=10`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json();
+          setStatusHistory(historyData.history || []);
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        // Only show error if it's not a migration-related error
+        if (!errorData.error?.includes('migration')) {
+          toast.error(errorData.error || 'Failed to update status');
+        } else {
+          // Silently handle migration errors - status will work with defaults
+          console.warn('Status update: Migration not applied yet, using default values');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving status:', error);
+      toast.error('Failed to update status');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle presence change
+  const handlePresenceChange = (newPresence: 'online' | 'away' | 'dnd' | 'invisible') => {
+    setPresence(newPresence);
+    // Auto-save on presence change
+    setTimeout(() => {
+      saveStatus();
+    }, 100);
+  };
+
+  // Handle privacy setting change
+  const handlePrivacyChange = () => {
+    // Auto-save on privacy change
+    setTimeout(() => {
+      saveStatus();
+    }, 300);
+  };
 
   // Theme-aware colors
   const cardBg = isDark ? 'bg-[#101828]' : 'bg-white';
@@ -59,34 +223,38 @@ const StatusPage: React.FC = () => {
               {/* Presence Buttons */}
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setPresence('online')}
+                  onClick={() => handlePresenceChange('online')}
+                  disabled={saving || loading}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     presence === 'online' ? buttonActive : buttonInactive
-                  }`}
+                  } ${saving || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Online
                 </button>
                 <button
-                  onClick={() => setPresence('away')}
+                  onClick={() => handlePresenceChange('away')}
+                  disabled={saving || loading}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     presence === 'away' ? buttonActive : buttonInactive
-                  }`}
+                  } ${saving || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Away
                 </button>
                 <button
-                  onClick={() => setPresence('dnd')}
+                  onClick={() => handlePresenceChange('dnd')}
+                  disabled={saving || loading}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     presence === 'dnd' ? buttonActive : buttonInactive
-                  }`}
+                  } ${saving || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Do Not Disturb
                 </button>
                 <button
-                  onClick={() => setPresence('invisible')}
+                  onClick={() => handlePresenceChange('invisible')}
+                  disabled={saving || loading}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     presence === 'invisible' ? buttonActive : buttonInactive
-                  }`}
+                  } ${saving || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Invisible
                 </button>
@@ -118,9 +286,17 @@ const StatusPage: React.FC = () => {
                     <option value="Custom…">Custom…</option>
                   </select>
                 </div>
-                <p className={`text-xs ${textMuted}`}>
-                  Wireframe only — connect to your presence service later.
-                </p>
+                <button
+                  onClick={saveStatus}
+                  disabled={saving || loading}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    saving || loading
+                      ? 'opacity-50 cursor-not-allowed'
+                      : buttonActive
+                  }`}
+                >
+                  {saving ? 'Saving...' : 'Save Status'}
+                </button>
               </div>
             </div>
           </section>
@@ -138,7 +314,11 @@ const StatusPage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={showLastSeen}
-                  onChange={(e) => setShowLastSeen(e.target.checked)}
+                  onChange={(e) => {
+                    setShowLastSeen(e.target.checked);
+                    handlePrivacyChange();
+                  }}
+                  disabled={loading}
                   className={`w-4 h-4 rounded ${inputBorder} ${inputBg} ${isDark ? 'text-[#6ea8ff]' : 'text-[#2563eb]'} focus:ring-2 ${isDark ? 'focus:ring-[rgba(110,168,255,0.35)]' : 'focus:ring-[rgba(37,99,235,0.35)]'}`}
                 />
                 <span className={`text-sm ${textPrimary}`}>Show last seen</span>
@@ -147,7 +327,11 @@ const StatusPage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={sendReadReceipts}
-                  onChange={(e) => setSendReadReceipts(e.target.checked)}
+                  onChange={(e) => {
+                    setSendReadReceipts(e.target.checked);
+                    handlePrivacyChange();
+                  }}
+                  disabled={loading}
                   className={`w-4 h-4 rounded ${inputBorder} ${inputBg} ${isDark ? 'text-[#6ea8ff]' : 'text-[#2563eb]'} focus:ring-2 ${isDark ? 'focus:ring-[rgba(110,168,255,0.35)]' : 'focus:ring-[rgba(37,99,235,0.35)]'}`}
                 />
                 <span className={`text-sm ${textPrimary}`}>Send read receipts</span>
@@ -156,7 +340,11 @@ const StatusPage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={allowStatusVisibility}
-                  onChange={(e) => setAllowStatusVisibility(e.target.checked)}
+                  onChange={(e) => {
+                    setAllowStatusVisibility(e.target.checked);
+                    handlePrivacyChange();
+                  }}
+                  disabled={loading}
                   className={`w-4 h-4 rounded ${inputBorder} ${inputBg} ${isDark ? 'text-[#6ea8ff]' : 'text-[#2563eb]'} focus:ring-2 ${isDark ? 'focus:ring-[rgba(110,168,255,0.35)]' : 'focus:ring-[rgba(37,99,235,0.35)]'}`}
                 />
                 <span className={`text-sm ${textPrimary}`}>Allow status visibility to everyone</span>
@@ -165,7 +353,11 @@ const StatusPage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={autoAway}
-                  onChange={(e) => setAutoAway(e.target.checked)}
+                  onChange={(e) => {
+                    setAutoAway(e.target.checked);
+                    handlePrivacyChange();
+                  }}
+                  disabled={loading}
                   className={`w-4 h-4 rounded ${inputBorder} ${inputBg} ${isDark ? 'text-[#6ea8ff]' : 'text-[#2563eb]'} focus:ring-2 ${isDark ? 'focus:ring-[rgba(110,168,255,0.35)]' : 'focus:ring-[rgba(37,99,235,0.35)]'}`}
                 />
                 <span className={`text-sm ${textPrimary}`}>Auto-away on inactivity</span>
@@ -203,24 +395,37 @@ const StatusPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {statusHistory.map((entry, index) => (
-                    <tr key={index}>
-                      <td className={`border-b ${tableBorder} px-2 py-2.5 ${textPrimary}`}>
-                        {entry.time}
-                      </td>
-                      <td className={`border-b ${tableBorder} px-2 py-2.5 ${textPrimary}`}>
-                        {entry.status}
-                      </td>
-                      <td className={`border-b ${tableBorder} px-2 py-2.5 ${textPrimary}`}>
-                        {entry.note}
+                  {loading ? (
+                    <tr>
+                      <td colSpan={3} className={`border-b ${tableBorder} px-2 py-2.5 ${textMuted} text-center`}>
+                        Loading history...
                       </td>
                     </tr>
-                  ))}
+                  ) : statusHistory.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className={`border-b ${tableBorder} px-2 py-2.5 ${textMuted} text-center`}>
+                        No status history yet
+                      </td>
+                    </tr>
+                  ) : (
+                    statusHistory.map((entry) => (
+                      <tr key={entry.id}>
+                        <td className={`border-b ${tableBorder} px-2 py-2.5 ${textPrimary}`}>
+                          {entry.time && entry.time !== '—' 
+                            ? format(new Date(entry.time), 'MMM d, yyyy h:mm a')
+                            : '—'}
+                        </td>
+                        <td className={`border-b ${tableBorder} px-2 py-2.5 ${textPrimary}`}>
+                          {entry.status}
+                        </td>
+                        <td className={`border-b ${tableBorder} px-2 py-2.5 ${textPrimary}`}>
+                          {entry.note || '—'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
-              <p className={`text-xs ${textMuted} mt-4`}>
-                Replace "—" with real timestamps from your backend.
-              </p>
             </div>
           </section>
         </div>
