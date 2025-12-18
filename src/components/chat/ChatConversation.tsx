@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Paperclip, Send, Smile, Mic, Trash2 } from 'lucide-react';
+import { Paperclip, Send, Smile, Mic, Trash2, Phone, Video } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface User {
@@ -48,6 +48,8 @@ interface ChatConversationProps {
   formatRecordingTime: (seconds: number) => string;
   chatName?: string;
   chatAvatar?: string;
+  onVoiceCall?: () => void;
+  onVideoCall?: () => void;
 }
 
 type MessageFilter = 'all' | 'unread' | 'pinned';
@@ -71,6 +73,8 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
   formatRecordingTime,
   chatName = 'Conversation',
   chatAvatar,
+  onVoiceCall,
+  onVideoCall,
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -156,9 +160,30 @@ const ChatConversation: React.FC<ChatConversationProps> = ({
             )}
           </div>
         </div>
-        <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
-          Thread-ready
-        </span>
+        <div className="flex items-center gap-2">
+          {/* Call Buttons */}
+          {onVoiceCall && (
+            <button
+              onClick={onVoiceCall}
+              className={`p-2 rounded-lg border transition-colors ${buttonBg} hover:opacity-80`}
+              title="Voice Call"
+            >
+              <Phone className="w-4 h-4" />
+            </button>
+          )}
+          {onVideoCall && (
+            <button
+              onClick={onVideoCall}
+              className={`p-2 rounded-lg border transition-colors ${buttonBg} hover:opacity-80`}
+              title="Video Call"
+            >
+              <Video className="w-4 h-4" />
+            </button>
+          )}
+          <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full border ${badgeBorder} ${badgeBg} ${textMuted} text-xs`}>
+            Thread-ready
+          </span>
+        </div>
       </div>
 
       {/* Filter Tabs */}

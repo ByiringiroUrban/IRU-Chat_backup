@@ -108,6 +108,14 @@ const ChatPage = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [showSettingsSidebar, setShowSettingsSidebar] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [activeCall, setActiveCall] = useState<{
+    chatId: string;
+    recipientId: string;
+    recipientName: string;
+    callType: 'voice' | 'video';
+    channelName?: string;
+    token?: string;
+  } | null>(null);
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1259,6 +1267,83 @@ const ChatPage = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  // Get the other user in a one-to-one chat
+  const getOtherUser = (chat: Chat) => {
+    if (chat.type === 'one-to-one' || chat.type === 'direct') {
+      const otherMember = chat.members.find(m => m.userId !== currentUserId);
+      return otherMember?.user;
+    }
+    return null;
+  };
+
+  // Start a call
+  const startCall = async (callType: 'voice' | 'video') => {
+    if (!selectedChat) {
+      toast.error('Please select a chat first');
+      return;
+    }
+
+    const otherUser = getOtherUser(selectedChat);
+    if (!otherUser) {
+      toast.error('Cannot call in group chats yet');
+      return;
+    }
+
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/calls/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recipientId: otherUser.id,
+          callType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start call');
+      }
+
+      const data = await response.json();
+      
+      // Set active call state
+      setActiveCall({
+        chatId: selectedChat.id,
+        recipientId: otherUser.id,
+        recipientName: otherUser.fullName,
+        callType,
+        channelName: data.channelName,
+        token: data.token,
+      });
+
+      // Emit call initiation via socket
+      if (socket) {
+        socket.emit('call:initiate', {
+          recipientId: otherUser.id,
+          callType,
+          channelName: data.channelName,
+          caller: {
+            id: currentUserId,
+            name: 'You',
+          },
+        });
+      }
+
+      // Navigate to calls page with active call
+      setActiveNav('calls');
+      toast.success(`Starting ${callType} call with ${otherUser.fullName}...`);
+    } catch (error) {
+      console.error('Error starting call:', error);
+      toast.error('Failed to start call');
+    }
+  };
+
+  const handleVoiceCall = () => startCall('voice');
+  const handleVideoCall = () => startCall('video');
+
   const isMessageRead = (message: Message) => {
     return (message.readBy || []).some(id => id !== message.senderId);
   };
@@ -1757,6 +1842,8 @@ const ChatPage = () => {
                   formatRecordingTime={formatRecordingTime}
                   chatName={selectedChat ? getChatName(selectedChat) : undefined}
                   chatAvatar={selectedChat ? getChatAvatar(selectedChat) : undefined}
+                  onVoiceCall={selectedChat ? handleVoiceCall : undefined}
+                  onVideoCall={selectedChat ? handleVideoCall : undefined}
                 />
 
                 {/* Info Panel - Always visible */}
