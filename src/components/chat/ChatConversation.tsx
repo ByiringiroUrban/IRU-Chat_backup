@@ -6,10 +6,11 @@ import { format } from 'date-fns';
 interface User {
   id: string;
   fullName: string;
+  name?: string;
   username?: string;
   profilePicture?: string;
   email?: string;
-  isOnline: boolean;
+  isOnline?: boolean;
   lastSeen?: string;
 }
 
@@ -21,6 +22,8 @@ interface Message {
   type: string;
   fileUrl?: string;
   fileName?: string;
+  fileSize?: number;
+  fileType?: string;
   createdAt: string;
   sender: User;
   readBy?: string[];

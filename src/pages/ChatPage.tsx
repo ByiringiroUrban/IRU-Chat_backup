@@ -41,10 +41,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 interface User {
   id: string;
   fullName: string;
+  name?: string;
   username?: string;
   profilePicture?: string;
   email?: string;
-  isOnline: boolean;
+  isOnline?: boolean;
   lastSeen?: string;
 }
 
@@ -301,7 +302,7 @@ const ChatPage = () => {
       
       // Show prominent clickable notification
       const callTypeLabel = data.callType === 'video' ? '📹 Video Call' : '📞 Voice Call';
-      const callerName = data.caller?.fullName || data.caller?.name || 'Unknown';
+      const callerName = data.caller?.fullName || 'Unknown';
       
       toast.info(
         `${callTypeLabel} from ${callerName}`,
@@ -314,32 +315,34 @@ const ChatPage = () => {
               console.log('ChatPage: ========== ANSWER NOW BUTTON CLICKED ==========');
               console.log('ChatPage: Call data:', data);
               
+              // Store in sessionStorage with AUTO-ANSWER flag
+              sessionStorage.setItem('incoming-call', JSON.stringify(data));
+              sessionStorage.setItem('auto-answer-call', 'true');
+              console.log('ChatPage: Stored call and auto-answer flag in sessionStorage');
+              
               // Force redirect to calls page immediately
               setActiveNav('calls');
               
-              // Store in sessionStorage
-              sessionStorage.setItem('incoming-call', JSON.stringify(data));
-              console.log('ChatPage: Stored call in sessionStorage');
+              // Trigger custom event with auto-answer flag
+              const callEventData = { ...data, autoAnswer: true };
               
-              // Trigger custom event immediately
-              window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
-              console.log('ChatPage: Custom event dispatched (immediate)');
+              // Trigger immediately and with delays to ensure CallsPage receives it
+              window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: callEventData }));
+              console.log('ChatPage: Custom event dispatched (immediate) with autoAnswer=true');
               
-              // Also trigger after delays to ensure CallsPage receives it
               setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
+                window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: callEventData }));
                 console.log('ChatPage: Custom event dispatched (200ms delay)');
               }, 200);
               
               setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
+                window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: callEventData }));
                 console.log('ChatPage: Custom event dispatched (500ms delay)');
               }, 500);
               
               console.log('ChatPage: ============================================');
             }
           },
-          important: true,
         }
       );
       

@@ -4,10 +4,11 @@ import { useTheme } from 'next-themes';
 interface User {
   id: string;
   fullName: string;
+  name?: string;
   username?: string;
   profilePicture?: string;
   email?: string;
-  isOnline: boolean;
+  isOnline?: boolean;
   lastSeen?: string;
 }
 
@@ -24,6 +25,7 @@ interface Message {
   replyToId?: string;
   readBy?: string[];
   isPinned?: boolean;
+  isDeleted?: boolean;
   createdAt: string;
   sender: User;
   replyTo?: Message;
@@ -36,12 +38,7 @@ interface Chat {
   members: Array<{
     userId: string;
     role: string;
-    user: {
-      id: string;
-      fullName: string;
-      profilePicture?: string;
-      isOnline: boolean;
-    };
+    user: User;
   }>;
 }
 

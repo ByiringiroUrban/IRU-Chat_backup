@@ -11,6 +11,7 @@ const AGORA_APP_ID = import.meta.env.VITE_AGORA_APP_ID || "8d21c418598b449690751
 interface User {
   id: string;
   fullName: string;
+  name?: string;
   profilePicture?: string;
   isOnline?: boolean;
 }
@@ -72,6 +73,7 @@ const CallsPage: React.FC = () => {
   const [hasRemoteVideo, setHasRemoteVideo] = useState(false);
   const [hasLocalVideo, setHasLocalVideo] = useState(false);
   const [showMeetingReady, setShowMeetingReady] = useState(false);
+  const [pendingAutoAnswer, setPendingAutoAnswer] = useState(false);
 
   // Refs
   const clientRef = useRef<IAgoraRTCClient | null>(null);
@@ -291,6 +293,12 @@ const CallsPage: React.FC = () => {
         // Also store in sessionStorage
         sessionStorage.setItem('incoming-call', JSON.stringify(callData));
         console.log('CallsPage: ✓ Incoming call set from custom event');
+        
+        // Check if this is an auto-answer request
+        if (callData.autoAnswer) {
+          console.log('CallsPage: ✓ Auto-answer flag detected, will auto-answer');
+          setPendingAutoAnswer(true);
+        }
       } else {
         console.error('CallsPage: Invalid call data received:', callData);
       }
@@ -302,6 +310,8 @@ const CallsPage: React.FC = () => {
     // Check sessionStorage periodically for incoming call (in case we just navigated here)
     const checkStoredCall = () => {
       const storedCall = sessionStorage.getItem('incoming-call');
+      const autoAnswerFlag = sessionStorage.getItem('auto-answer-call');
+      
       if (storedCall) {
         try {
           const callData = JSON.parse(storedCall);
@@ -309,6 +319,13 @@ const CallsPage: React.FC = () => {
             console.log('CallsPage: Found stored incoming call:', callData);
             // Always set it, even if incomingCall already exists (to update with latest data)
             setIncomingCall(callData);
+            
+            // Check if we should auto-answer
+            if (autoAnswerFlag === 'true') {
+              console.log('CallsPage: ✓ Auto-answer flag found in sessionStorage');
+              sessionStorage.removeItem('auto-answer-call');
+              setPendingAutoAnswer(true);
+            }
           }
         } catch (error) {
           console.error('CallsPage: Error parsing stored call:', error);
@@ -1190,6 +1207,32 @@ const CallsPage: React.FC = () => {
       console.log('CallsPage: No incoming call - modal should be hidden');
     }
   }, [incomingCall]);
+
+  // Auto-answer effect: when pendingAutoAnswer is true and we have an incoming call, answer it
+  useEffect(() => {
+    if (pendingAutoAnswer && incomingCall && incomingCall.channelName) {
+      console.log('CallsPage: ========== AUTO-ANSWERING CALL ==========');
+      console.log('CallsPage: pendingAutoAnswer:', pendingAutoAnswer);
+      console.log('CallsPage: incomingCall:', incomingCall);
+      
+      // Reset the flag immediately to prevent double-answering
+      setPendingAutoAnswer(false);
+      
+      // Small delay to ensure component is fully ready
+      const autoAnswerTimeout = setTimeout(async () => {
+        try {
+          console.log('CallsPage: Executing auto-answer...');
+          await answerCall();
+          console.log('CallsPage: ✓ Auto-answer completed successfully');
+        } catch (error) {
+          console.error('CallsPage: ✗ Auto-answer failed:', error);
+          toast.error('Failed to auto-answer call. Please click Answer manually.');
+        }
+      }, 500);
+      
+      return () => clearTimeout(autoAnswerTimeout);
+    }
+  }, [pendingAutoAnswer, incomingCall]);
 
   // Active call UI - Google Meet style
   if (callState?.isInCall) {
