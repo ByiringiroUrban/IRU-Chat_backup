@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 const ProcessSection = () => {
     return (
-        <section className="relative overflow-hidden py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
+        <section className="relative overflow-hidden py-16 md:py-24 bg-[#0a0e1a]">
             {/* Background blobs for a dynamic feel */}
             <div className="absolute top-0 -right-20 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
             <div className="absolute bottom-0 -left-20 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -15,10 +15,10 @@ const ProcessSection = () => {
                 <div className="flex flex-col lg:flex-row items-start justify-between gap-16">
                     {/* Left Content Area - Title and "How We Work" */}
                     <div className="lg:w-2/5 text-center lg:text-left">
-                        <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2 flex items-center justify-center lg:justify-start">
-                            <span className="w-8 h-px bg-blue-600 dark:bg-blue-400 mr-2"></span> OUR PROCESS
+                        <p className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2 flex items-center justify-center lg:justify-start">
+                            <span className="w-8 h-px bg-blue-400 mr-2"></span> OUR PROCESS
                         </p>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-6">
                             Easy Dynamic And <br className="hidden md:block" /> Optimal Workflows
                         </h1>
 
@@ -63,22 +63,22 @@ const ProcessSection = () => {
 };
 
 const StepCard = ({ step, title, description }) => (
-    <div className="p-8 rounded-2xl shadow-lg bg-white dark:bg-gray-800 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-blue-500">
+    <div className="p-8 rounded-2xl shadow-lg bg-gray-800 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl border-2 border-transparent hover:border-blue-500">
         <div className="flex items-center mb-4">
-            <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-gray-700">
-                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{step}</span>
-                <div className="absolute w-16 h-16 rounded-full bg-blue-100 dark:bg-gray-700 -z-10 animate-ping opacity-75"></div>
+            <div className="relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-700">
+                <span className="text-lg font-bold text-blue-400">{step}</span>
+                <div className="absolute w-16 h-16 rounded-full bg-gray-700 -z-10 animate-ping opacity-75"></div>
             </div>
             <div className="ml-4">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
                     STEP
                 </p>
-                <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-1">
+                <h3 className="text-lg font-extrabold text-white mt-1">
                     {title}
                 </h3>
             </div>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-300">
             {description}
         </p>
     </div>

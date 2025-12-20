@@ -1,213 +1,180 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Youtube, Instagram } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Twitter, Linkedin, Youtube, Instagram } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
-const MovingWords = () => {
-  const words = ["Innovation", "Technology", "Learning", "Future", "Growth", "Success"];
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+const Footer = () => {
+  const [currentWord, setCurrentWord] = useState(0);
+  const words = ["Innovation", "Future"];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % words.length);
-        setIsAnimating(false);
-      }, 500);
-    }, 2500);
+      setCurrentWord((prev) => (prev + 1) % words.length);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="overflow-hidden h-12 md:h-16 mb-6">
-      <div className="relative h-full flex items-center justify-center">
-        {words.map((word, index) => (
-          <span
-            key={index}
-            className={`absolute text-xl md:text-3xl font-bold transition-all duration-700 ease-in-out ${index === currentIndex
-              ? `opacity-100 transform-none ${isAnimating ? "blur-sm scale-105" : ""}`
-              : "opacity-0 translate-y-16"
-              }`}
-          >
-            <span className="text-white"> Smart, Secure & AI-Powered </span>
-            <span className="bg-gradient-to-r from-techblue-300 via-techblue to-techpurple-light text-transparent bg-clip-text">
-              {word}
+    <footer className="bg-[#0a0e1a]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16">
+        {/* Animated Heading */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            <span className="inline-block animate-slide-in">
+              Smart,Secure&AI-Powered
             </span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
+            <span className="inline-block min-w-[200px] ml-2 relative h-[1.2em] overflow-hidden">
+              <span
+                key={currentWord}
+                className="absolute inset-0 flex items-center justify-center animate-slide-in"
+              >
+                {words[currentWord]}
+              </span>
+            </span>
+          </h2>
+        </div>
 
-const Footer = () => {
-  return (
-    <footer className="bg-gradient-to-r from-techdark to-techblue-900 text-white relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-15 pointer-events-none">
-        <div
-          className="absolute w-40 h-40 bg-techblue-400 rounded-full -top-10 -left-10 animate-pulse"
-          style={{ animationDuration: "6s" }}
-        ></div>
-        <div
-          className="absolute w-60 h-60 bg-techblue-500 rounded-full top-40 right-20 animate-pulse"
-          style={{ animationDuration: "8s" }}
-        ></div>
-        <div
-          className="absolute w-20 h-20 bg-techpurple-light rounded-full bottom-10 left-1/4 animate-pulse"
-          style={{ animationDuration: "4s" }}
-        ></div>
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-16 pb-8 relative z-10">
-        <MovingWords />
-
+        {/* Four Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Company Info */}
-          <div className="transform transition-transform duration-500 hover:-translate-y-2">
-            <h3 className="text-xl md:text-2xl font-bold mb-4 relative inline-block">
-              IRU<span className="text-techblue-300"> Chat</span>
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light transition-all duration-300 group-hover:w-full"></span>
+          {/* Column 1 - IRU Chat */}
+          <div>
+            <h3 className="text-xl font-bold mb-4 text-white">
+              IRU Chat
             </h3>
-            <p className="text-gray-300 mb-6">
-              Developed by IRU BUSINESS GROUP Ltd. Smart, secure, and scalable communication
-              for modern organizations worldwide.
+            <p className="text-gray-300 mb-6 text-sm leading-relaxed">
+              Developed by IRU BUSINESS GROUP Ltd. Smart, secure, and scalable communication for modern organizations worldwide.
             </p>
-
             {/* Social Links */}
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               <a
                 href="https://www.instagram.com/irubusinessgroup?igsh=Y2s1N25qY2xzM2Zu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
                 aria-label="Instagram"
               >
-                <Instagram size={20} />
+                <Instagram size={18} className="text-white" />
               </a>
               <a
                 href="https://x.com/IRUBUSINESSES?t=QHreTJ4D1GtZfix4tQIpyw&s=09"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
                 aria-label="X (Twitter)"
               >
-                <Twitter size={20} />
+                <Twitter size={18} className="text-white" />
               </a>
               <a
                 href="https://www.linkedin.com/in/iru-business-group-571ba3334?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
                 aria-label="LinkedIn"
               >
-                <Linkedin size={20} />
+                <Linkedin size={18} className="text-white" />
               </a>
               <a
                 href="https://www.youtube.com/@IRUTV-2060"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-techblue hover:scale-110 transition-all duration-300"
+                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
                 aria-label="YouTube"
               >
-                <Youtube size={20} />
+                <Youtube size={18} className="text-white" />
               </a>
             </div>
           </div>
 
-          {/* Company Links */}
-          <div className="transform transition-transform duration-500 hover:-translate-y-2">
-            <h4 className="font-semibold text-lg mb-4 relative inline-block">
+          {/* Column 2 - Company */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4 text-white">
               Company
-              <span className="absolute -bottom-1 left-0 w-1/3 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light"></span>
             </h4>
-            <ul className="space-y-2">
-              <li className="transform hover:translate-x-2 transition-transform duration-300">
-                <Link to="/about" className="text-gray-300 hover:text-white flex items-center">
-                  <span className="hover:text-techblue-300">About Us</span>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/about" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                  About Us
                 </Link>
               </li>
-              <li className="transform hover:translate-x-2 transition-transform duration-300">
-                <Link to="/contact" className="text-gray-300 hover:text-white flex items-center">
-                  <span className="hover:text-techblue-300">Contact</span>
+              <li>
+                <Link to="/contact" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                  Contact
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Solutions Links */}
-          <div className="transform transition-transform duration-500 hover:-translate-y-2">
-            <h4 className="font-semibold text-lg mb-4 relative inline-block">
+          {/* Column 3 - Solutions */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4 text-white">
               Solutions
-              <span className="absolute -bottom-1 left-0 w-1/3 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light"></span>
             </h4>
-            <ul className="space-y-2">
-              <li className="transform hover:translate-x-2 transition-transform duration-300">
-                <Link to="/features" className="text-gray-300 hover:text-white flex items-center">
-                  <span className="hover:text-techblue-300">Features</span>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/features" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                  Features
                 </Link>
               </li>
-              <li className="transform hover:translate-x-2 transition-transform duration-300">
-                <Link to="/solutions" className="text-gray-300 hover:text-white flex items-center">
-                  <span className="hover:text-techblue-300">Solutions</span>
+              <li>
+                <Link to="/solutions" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                  Solutions
                 </Link>
               </li>
-              <li className="transform hover:translate-x-2 transition-transform duration-300">
-                <Link to="/pricing" className="text-gray-300 hover:text-white flex items-center">
-                  <span className="hover:text-techblue-300">Pricing</span>
+              <li>
+                <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm">
+                  Pricing
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div className="transform transition-transform duration-500 hover:-translate-y-2">
-            <h4 className="font-semibold text-lg mb-4 relative inline-block">
+          {/* Column 4 - Newsletter */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4 text-white">
               Newsletter
-              <span className="absolute -bottom-1 left-0 w-1/3 h-0.5 bg-gradient-to-r from-techblue to-techpurple-light"></span>
             </h4>
-            <p className="text-gray-300 mb-4">Subscribe to our newsletter for the latest updates.</p>
-            <div className="flex space-x-2 group">
-              <Input
-                type="email"
-                placeholder="Your Email"
-                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-techblue-300 transition-all duration-300"
-              />
-              <Button className="bg-techblue hover:bg-techblue-700 group-hover:animate-pulse transition-all duration-300 button-glow">
-                Subscribe
-              </Button>
-            </div>
+            <p className="text-gray-300 mb-4 text-sm">
+              Subscribe to our newsletter for the latest updates.
+            </p>
+            <Input
+              type="email"
+              placeholder="Your Email"
+              className="bg-white/10 border-white/20 text-gray-300 placeholder:text-gray-500 focus:border-techblue-300 transition-all duration-300 w-full"
+            />
           </div>
         </div>
 
-        {/* Footer Bottom */}
-        <div className="border-t border-white/20 pt-8 mt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <a
-              href="https://www.irubusinessgroup.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 text-sm hover:text-white transition-colors duration-300"
-            >
-              &copy; {new Date().getFullYear()} IRU Business Group. All rights reserved.
-            </a>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              {["Privacy Policy", "Terms of Service", "Sitemap"].map((item, index) => (
-                <Link
-                  key={index}
-                  to={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="text-gray-400 text-sm hover:text-white hover:underline transition-all duration-300"
-                >
-                  {item}
-                </Link>
-              ))}
+        {/* Footer Bottom - Separated by line */}
+        <div className="border-t border-gray-600 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-300 text-sm">
+              © {new Date().getFullYear()} IRU Business Group. All rights reserved.
+            </p>
+            <div className="flex space-x-6">
+              <Link
+                to="/privacy-policy"
+                className="text-gray-300 text-sm hover:text-white transition-colors duration-300"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms-of-service"
+                className="text-gray-300 text-sm hover:text-white transition-colors duration-300"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                to="/sitemap"
+                className="text-gray-300 text-sm hover:text-white transition-colors duration-300"
+              >
+                Sitemap
+              </Link>
             </div>
           </div>
         </div>
       </div>
+
     </footer>
   );
 };
