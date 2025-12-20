@@ -5,10 +5,11 @@ import { format } from 'date-fns';
 interface User {
   id: string;
   fullName: string;
+  name?: string;
   username?: string;
   profilePicture?: string;
   email?: string;
-  isOnline: boolean;
+  isOnline?: boolean;
   lastSeen?: string;
 }
 
@@ -37,15 +38,6 @@ interface Chat {
     user: User;
   }>;
   messages: Message[];
-}
-
-interface User {
-  id: string;
-  fullName: string;
-  username?: string;
-  profilePicture?: string;
-  email: string;
-  isOnline?: boolean;
 }
 
 interface ChatListProps {
