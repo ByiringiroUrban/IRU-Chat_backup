@@ -279,6 +279,79 @@ const ChatPage = () => {
       });
     });
 
+    // Handle incoming calls - redirect to Calls page
+    newSocket.on('call:incoming', (data: {
+      channelName: string;
+      callType: 'voice' | 'video';
+      caller: { id: string; fullName?: string; profilePicture?: string };
+      token?: string;
+    }) => {
+      console.log('ChatPage: ========== INCOMING CALL RECEIVED ==========');
+      console.log('ChatPage: Call data:', JSON.stringify(data, null, 2));
+      console.log('ChatPage: Caller:', data.caller.fullName);
+      console.log('ChatPage: Call type:', data.callType);
+      console.log('ChatPage: Channel:', data.channelName);
+      
+      // Store incoming call data in sessionStorage for CallsPage to pick up
+      sessionStorage.setItem('incoming-call', JSON.stringify(data));
+      
+      // IMMEDIATELY redirect to Calls page
+      console.log('ChatPage: Redirecting to Calls page immediately...');
+      setActiveNav('calls');
+      
+      // Show prominent clickable notification
+      const callTypeLabel = data.callType === 'video' ? '📹 Video Call' : '📞 Voice Call';
+      const callerName = data.caller?.fullName || data.caller?.name || 'Unknown';
+      
+      toast.info(
+        `${callTypeLabel} from ${callerName}`,
+        {
+          duration: 20000,
+          description: 'Redirecting to call page...',
+          action: {
+            label: 'Answer Now',
+            onClick: async () => {
+              console.log('ChatPage: ========== ANSWER NOW BUTTON CLICKED ==========');
+              console.log('ChatPage: Call data:', data);
+              
+              // Force redirect to calls page immediately
+              setActiveNav('calls');
+              
+              // Store in sessionStorage
+              sessionStorage.setItem('incoming-call', JSON.stringify(data));
+              console.log('ChatPage: Stored call in sessionStorage');
+              
+              // Trigger custom event immediately
+              window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
+              console.log('ChatPage: Custom event dispatched (immediate)');
+              
+              // Also trigger after delays to ensure CallsPage receives it
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
+                console.log('ChatPage: Custom event dispatched (200ms delay)');
+              }, 200);
+              
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
+                console.log('ChatPage: Custom event dispatched (500ms delay)');
+              }, 500);
+              
+              console.log('ChatPage: ============================================');
+            }
+          },
+          important: true,
+        }
+      );
+      
+      // Trigger custom event immediately for CallsPage
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('incoming-call-received', { detail: data }));
+        console.log('ChatPage: Custom event dispatched to CallsPage (immediate)');
+      }, 100);
+      
+      console.log('ChatPage: ====================================');
+    });
+
     newSocket.on('message:new', (message: Message) => {
       console.log('Received new message via socket:', message);
       
@@ -1290,6 +1363,26 @@ const ChatPage = () => {
     }
 
     try {
+      // Redirect to Calls page first
+      console.log('ChatPage: Redirecting to Calls page to start call...');
+      setActiveNav('calls');
+      
+      // Store call initiation data in sessionStorage for CallsPage
+      const callInitData = {
+        recipientId: otherUser.id,
+        recipientName: otherUser.fullName,
+        callType,
+        fromChat: true,
+      };
+      sessionStorage.setItem('initiate-call', JSON.stringify(callInitData));
+      
+      // Trigger custom event to notify CallsPage
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('initiate-call', { detail: callInitData }));
+      }, 100);
+      
+      toast.info(`Starting ${callType === 'video' ? 'video' : 'voice'} call...`);
+      
       const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/api/calls/start`, {
         method: 'POST',
@@ -1348,16 +1441,22 @@ const ChatPage = () => {
     return (message.readBy || []).some(id => id !== message.senderId);
   };
 
-  // Filter chats
-  const filteredChats = chats.filter(chat => {
-    if (chatFilter === 'unread') return (chat.unreadCount || 0) > 0;
-    if (chatFilter === 'pinned') return chat.isPinned;
-    return true;
-  }).filter(chat => {
-    if (!searchQuery) return true;
-    const name = getChatName(chat).toLowerCase();
-    return name.includes(searchQuery.toLowerCase());
-  });
+  // Filter chats and remove duplicates
+  const filteredChats = chats
+    .filter((chat, index, self) => {
+      // Remove duplicates by checking if this is the first occurrence of this chat ID
+      return index === self.findIndex(c => c.id === chat.id);
+    })
+    .filter(chat => {
+      if (chatFilter === 'unread') return (chat.unreadCount || 0) > 0;
+      if (chatFilter === 'pinned') return chat.isPinned;
+      return true;
+    })
+    .filter(chat => {
+      if (!searchQuery) return true;
+      const name = getChatName(chat).toLowerCase();
+      return name.includes(searchQuery.toLowerCase());
+    });
 
   const isDark = theme === 'dark';
 
