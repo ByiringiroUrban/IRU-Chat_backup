@@ -1405,7 +1405,24 @@ const ChatPage = () => {
 
       const data = await response.json();
       
-      // Set active call state
+      // Store call data in sessionStorage for CallRoomPage
+      const callRoomData = {
+        channelName: data.channelName,
+        callType: callType,
+        remoteUser: {
+          id: otherUser.id,
+          fullName: otherUser.fullName,
+          profilePicture: otherUser.profilePicture,
+        },
+        token: data.token,
+      };
+      sessionStorage.setItem(`call:${data.channelName}`, JSON.stringify(callRoomData));
+      
+      // Redirect to /calls route
+      console.log('ChatPage: Redirecting to /calls route...');
+      window.location.href = `/calls?channel=${encodeURIComponent(data.channelName)}&type=${callType}`;
+      
+      // Set active call state (for reference, but we're redirecting)
       setActiveCall({
         chatId: selectedChat.id,
         recipientId: otherUser.id,

@@ -265,6 +265,18 @@ const CallsPage: React.FC = () => {
       }
     });
 
+    socket.on('call:accept:error', (data: { error: string; callerId?: string }) => {
+      console.error('CallsPage: ========== CALL ACCEPT ERROR ==========');
+      console.error('CallsPage: Error data:', data);
+      console.error('CallsPage: Error message:', data.error);
+      if (data.callerId) {
+        console.error('CallsPage: Caller ID:', data.callerId);
+      }
+      console.error('CallsPage: ===================================');
+      toast.error(`Failed to accept call: ${data.error}`);
+      // Don't clear incoming call here - let user try again or manually clear
+    });
+
     socket.on('call:ended', () => {
       console.log('CallsPage: Call ended');
       toast.info('Call ended');
@@ -763,33 +775,19 @@ const CallsPage: React.FC = () => {
       console.log('CallsPage: ✓ Call initiation event emitted');
       console.log('CallsPage: ====================================');
 
-      // Set call state
-      setCallState({
-        isInCall: true,
-        callType: callType === 'meeting' ? 'video' : callType,
+      // Store call data in sessionStorage for CallRoomPage
+      const callRoomData = {
         channelName: data.channelName,
+        callType: callType === 'meeting' ? 'video' : callType,
         remoteUser: selectedUser,
-        isMuted: false,
-        isVideoOff: false,
-        callDuration: 0,
-      });
+        token: data.token,
+      };
+      sessionStorage.setItem(`call:${data.channelName}`, JSON.stringify(callRoomData));
       
-      // Clear previous messages
-      setCallMessages([]);
-      setHasRemoteVideo(false);
-      setHasLocalVideo(false);
+      // Redirect to /calls route
+      console.log('CallsPage: Redirecting to /calls route...');
+      window.location.href = `/calls?channel=${encodeURIComponent(data.channelName)}&type=${callType === 'meeting' ? 'video' : callType}`;
       
-      // Show meeting ready popup for a few seconds
-      setShowMeetingReady(true);
-      setTimeout(() => {
-        setShowMeetingReady(false);
-      }, 5000);
-
-      // Start call timer
-      callTimerRef.current = setInterval(() => {
-        setCallState(prev => prev ? { ...prev, callDuration: prev.callDuration + 1 } : null);
-      }, 1000);
-
       toast.success(`Calling ${selectedUser.fullName}...`);
     } catch (error) {
       console.error('Error starting call:', error);
@@ -921,13 +919,50 @@ const CallsPage: React.FC = () => {
         console.log('CallsPage: ✓ Published audio track (answer call)');
       }
 
-      // Notify caller
-      console.log('CallsPage: Notifying caller of acceptance...');
-      socketRef.current?.emit('call:accept', {
+      // Notify caller FIRST (before joining Agora channel) to ensure caller knows call is being answered
+      console.log('CallsPage: ========== NOTIFYING CALLER ==========');
+      console.log('CallsPage: Socket ref exists:', !!socketRef.current);
+      console.log('CallsPage: Socket connected:', socketRef.current?.connected);
+      console.log('CallsPage: Socket ID:', socketRef.current?.id);
+      console.log('CallsPage: Channel name:', incomingCall.channelName);
+      console.log('CallsPage: Caller ID:', incomingCall.caller.id);
+      
+      if (!socketRef.current) {
+        console.error('CallsPage: ✗ Socket ref is null! Cannot notify caller');
+        toast.error('Socket not initialized. Please refresh the page.');
+        throw new Error('Socket not initialized');
+      }
+      
+      if (!socketRef.current.connected) {
+        console.error('CallsPage: ✗ Socket not connected! Connected:', socketRef.current.connected);
+        console.error('CallsPage: Socket state:', {
+          connected: socketRef.current.connected,
+          disconnected: socketRef.current.disconnected,
+          id: socketRef.current.id,
+        });
+        toast.error('Not connected to server. Please refresh the page.');
+        throw new Error('Socket not connected');
+      }
+      
+      const acceptData = {
         channelName: incomingCall.channelName,
         callerId: incomingCall.caller.id,
+      };
+      
+      console.log('CallsPage: Emitting call:accept with data:', JSON.stringify(acceptData, null, 2));
+      console.log('CallsPage: Socket emit function exists:', typeof socketRef.current.emit === 'function');
+      
+      // Emit with acknowledgment to verify it was sent
+      socketRef.current.emit('call:accept', acceptData, (response: any) => {
+        if (response) {
+          console.log('CallsPage: ✓ Received acknowledgment from server:', response);
+        } else {
+          console.log('CallsPage: ✓ Event sent (no acknowledgment expected)');
+        }
       });
+      
       console.log('CallsPage: ✓ Call acceptance notification sent');
+      console.log('CallsPage: ===================================');
 
       // Set call state BEFORE clearing incoming call
       // Ensure remoteUser has all necessary fields
@@ -949,35 +984,27 @@ const CallsPage: React.FC = () => {
         callDuration: 0,
       };
       
-      console.log('CallsPage: Setting call state with remoteUser:', remoteUser);
-      setCallState(newCallState);
-      console.log('CallsPage: ✓ Call state set - Google Meet interface should now be visible');
+      console.log('CallsPage: Setting up call data for redirect...');
       
-      // Clear previous messages and reset video states
-      setCallMessages([]);
-      setHasRemoteVideo(false);
-      // Don't reset hasLocalVideo here if we just set it
+      // Store call data in sessionStorage for CallRoomPage
+      const callRoomData = {
+        channelName: incomingCall.channelName,
+        callType: incomingCall.callType,
+        remoteUser: remoteUser,
+        caller: incomingCall.caller,
+        token: data.token,
+      };
+      sessionStorage.setItem(`call:${incomingCall.channelName}`, JSON.stringify(callRoomData));
       
-      // Show meeting ready popup for a few seconds
-      setShowMeetingReady(true);
-      setTimeout(() => {
-        setShowMeetingReady(false);
-      }, 5000);
-
-      // Start call timer
-      if (callTimerRef.current) {
-        clearInterval(callTimerRef.current);
-      }
-      callTimerRef.current = setInterval(() => {
-        setCallState(prev => prev ? { ...prev, callDuration: prev.callDuration + 1 } : null);
-      }, 1000);
-
-      // Clear incoming call AFTER setting call state
+      // Clear incoming call
       setIncomingCall(null);
       console.log('CallsPage: ✓ Incoming call cleared');
-      console.log('CallsPage: ====================================');
       
-      toast.success('Call connected!');
+      // Redirect to /calls route
+      console.log('CallsPage: Redirecting to /calls route...');
+      window.location.href = `/calls?channel=${encodeURIComponent(incomingCall.channelName)}&type=${incomingCall.callType}`;
+      
+      console.log('CallsPage: ====================================');
     } catch (error: any) {
       console.error('CallsPage: ✗ Error answering call:', error);
       console.error('CallsPage: Error details:', {
@@ -1207,6 +1234,22 @@ const CallsPage: React.FC = () => {
       console.log('CallsPage: No incoming call - modal should be hidden');
     }
   }, [incomingCall]);
+
+  // Debug: Log call state changes to track when call interface should appear
+  useEffect(() => {
+    console.log('CallsPage: ========== CALL STATE CHANGED ==========');
+    console.log('CallsPage: Call state:', callState);
+    if (callState) {
+      console.log('CallsPage: isInCall:', callState.isInCall);
+      console.log('CallsPage: channelName:', callState.channelName);
+      console.log('CallsPage: callType:', callState.callType);
+      console.log('CallsPage: remoteUser:', callState.remoteUser);
+      console.log('CallsPage: ✓ Call interface should be visible');
+    } else {
+      console.log('CallsPage: No active call - showing main calls page');
+    }
+    console.log('CallsPage: ====================================');
+  }, [callState]);
 
   // Auto-answer effect: when pendingAutoAnswer is true and we have an incoming call, answer it
   useEffect(() => {
@@ -1655,33 +1698,55 @@ const CallsPage: React.FC = () => {
                 onClick={async (e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  
+                  // Immediate log to confirm button click is registered
                   console.log('CallsPage: ========== ANSWER BUTTON CLICKED ==========');
+                  console.log('CallsPage: Button click event received at:', new Date().toISOString());
                   console.log('CallsPage: Incoming call exists:', !!incomingCall);
                   console.log('CallsPage: Incoming call data:', JSON.stringify(incomingCall, null, 2));
                   console.log('CallsPage: Channel name:', incomingCall?.channelName);
+                  console.log('CallsPage: Caller ID:', incomingCall?.caller?.id);
+                  console.log('CallsPage: Caller name:', incomingCall?.caller?.fullName);
                   
-                  if (!incomingCall) {
-                    console.error('CallsPage: ✗ incomingCall is null!');
-                    toast.error('No incoming call found. Please wait for the call notification.');
-                    return;
-                  }
-                  
-                  if (!incomingCall.channelName) {
-                    console.error('CallsPage: ✗ Channel name is missing!');
-                    toast.error('Invalid call data. Please try again.');
-                    return;
-                  }
-                  
-                  console.log('CallsPage: ✓ All checks passed, calling answerCall()...');
+                  // Show loading state immediately
+                  const button = e.currentTarget;
+                  const originalDisabled = button.disabled;
+                  button.disabled = true;
                   
                   try {
+                    if (!incomingCall) {
+                      console.error('CallsPage: ✗ incomingCall is null!');
+                      toast.error('No incoming call found. Please wait for the call notification.');
+                      return;
+                    }
+                    
+                    if (!incomingCall.channelName) {
+                      console.error('CallsPage: ✗ Channel name is missing!');
+                      toast.error('Invalid call data. Please try again.');
+                      return;
+                    }
+                    
+                    console.log('CallsPage: ✓ All checks passed, calling answerCall()...');
+                    console.log('CallsPage: answerCall function exists:', typeof answerCall === 'function');
+                    
+                    // Call answerCall and wait for it to complete
                     await answerCall();
+                    
                     console.log('CallsPage: ✓ Answer call completed successfully');
                     console.log('CallsPage: Call interface should now be visible');
                   } catch (error: any) {
-                    console.error('CallsPage: ✗ Error in answerCall:', error);
-                    console.error('CallsPage: Error stack:', error.stack);
-                    toast.error(`Failed to answer call: ${error.message || 'Unknown error'}`);
+                    console.error('CallsPage: ✗ ERROR IN ANSWER BUTTON HANDLER ==========');
+                    console.error('CallsPage: Error type:', error?.constructor?.name);
+                    console.error('CallsPage: Error message:', error?.message);
+                    console.error('CallsPage: Error stack:', error?.stack);
+                    console.error('CallsPage: Full error object:', error);
+                    console.error('CallsPage: ====================================');
+                    toast.error(`Failed to answer call: ${error?.message || 'Unknown error'}`);
+                  } finally {
+                    // Re-enable button after a delay
+                    setTimeout(() => {
+                      button.disabled = originalDisabled;
+                    }, 1000);
                   }
                   
                   console.log('CallsPage: ====================================');

@@ -11,6 +11,7 @@ import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import ChatPage from "./pages/ChatPage";
+import CallRoomPage from "./pages/CallRoomPage";
 import CustomerSupport from "./pages/CustomerSupport";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/features" element={<Features />} />
           <Route path="/solutions" element={<Solutions />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/calls" element={<CallRoomPage />} />
           <Route path="/support" element={<CustomerSupport />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/account" element={<Account />} />
